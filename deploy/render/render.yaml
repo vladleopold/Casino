@@ -1,0 +1,134 @@
+databases:
+  - name: casino-db
+    plan: free
+    databaseName: casino
+    user: casino
+    ipAllowList: []
+
+services:
+  - type: keyvalue
+    name: casino-cache
+    plan: free
+    ipAllowList: []
+
+  - type: pserv
+    name: casino-minio
+    runtime: image
+    plan: starter
+    image:
+      url: docker.io/bitnami/minio:latest
+    disk:
+      name: minio-data
+      mountPath: /bitnami/minio/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: MINIO_API_PORT_NUMBER
+        value: 10000
+      - key: MINIO_CONSOLE_PORT_NUMBER
+        value: 10001
+      - key: MINIO_ROOT_USER
+        generateValue: true
+      - key: MINIO_ROOT_PASSWORD
+        generateValue: true
+      - key: MINIO_DEFAULT_BUCKETS
+        value: casino-assets
+
+  - type: web
+    name: casino-directus
+    runtime: node
+    plan: starter
+    rootDir: .
+    autoDeployTrigger: off
+    buildCommand: corepack pnpm install --frozen-lockfile
+    preDeployCommand: corepack pnpm --filter directus bootstrap
+    startCommand: corepack pnpm --filter directus start
+    healthCheckPath: /server/health
+    envVars:
+      - key: PORT
+        value: 8055
+      - key: PUBLIC_URL
+        value: https://casino-directus.onrender.com
+      - key: SECRET
+        generateValue: true
+      - key: KEY
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DB_CLIENT
+        value: pg
+      - key: DB_HOST
+        fromDatabase:
+          name: casino-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: casino-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: casino-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: casino-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: casino-db
+          property: password
+      - key: REDIS
+        fromService:
+          type: keyvalue
+          name: casino-cache
+          property: connectionString
+      - key: CORS_ENABLED
+        value: "true"
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: STORAGE_LOCATIONS
+        value: s3
+      - key: STORAGE_S3_DRIVER
+        value: s3
+      - key: STORAGE_S3_BUCKET
+        value: casino-assets
+      - key: STORAGE_S3_REGION
+        value: us-east-1
+      - key: STORAGE_S3_ENDPOINT
+        value: http://casino-minio:10000
+      - key: STORAGE_S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: STORAGE_S3_KEY
+        fromService:
+          type: pserv
+          name: casino-minio
+          envVarKey: MINIO_ROOT_USER
+      - key: STORAGE_S3_SECRET
+        fromService:
+          type: pserv
+          name: casino-minio
+          envVarKey: MINIO_ROOT_PASSWORD
+
+  - type: web
+    name: casino-events
+    runtime: node
+    plan: starter
+    rootDir: .
+    autoDeployTrigger: off
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter events build
+    startCommand: corepack pnpm --filter events start
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: BRAZE_REST_API_KEY
+        sync: false
+      - key: BRAZE_ENDPOINT
+        sync: false
