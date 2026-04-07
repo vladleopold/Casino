@@ -1,0 +1,53 @@
+name: Platform CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Typecheck web
+        run: corepack pnpm --filter web typecheck
+
+      - name: Build events
+        run: corepack pnpm --filter events build
+
+      - name: Build web
+        run: corepack pnpm --filter web build
+
+      - name: Check route budgets
+        run: corepack pnpm budget:web
+
+      - name: Start production web server
+        run: |
+          nohup corepack pnpm --filter web start > /tmp/slotcity-web.log 2>&1 &
+
+      - name: Wait for web server
+        run: corepack pnpm dlx wait-on@8.0.1 http://127.0.0.1:3000
+
+      - name: Run Lighthouse CI
+        run: corepack pnpm dlx @lhci/cli@0.15.1 autorun --config=infra/ci/lighthouserc.json

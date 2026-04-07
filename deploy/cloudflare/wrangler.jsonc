@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "slotcity-edge",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-01",
+  "workers_dev": false,
+  "vars": {
+    "WEB_ORIGIN": "https://slotcity-web.vercel.app",
+    "DIRECTUS_ORIGIN": "https://slotcity-directus.onrender.com",
+    "EVENTS_ORIGIN": "https://slotcity-events.onrender.com"
+  }
+}

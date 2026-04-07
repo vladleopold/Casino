@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@slotcity/analytics-schema": ["packages/analytics-schema/src/index.ts"],
+      "@slotcity/cms-sdk": ["packages/cms-sdk/src/index.ts"],
+      "@slotcity/config": ["packages/config/src/index.ts"],
+      "@slotcity/flags-sdk": ["packages/flags-sdk/src/index.ts"],
+      "@slotcity/theme": ["packages/theme/src/index.ts"],
+      "@slotcity/tracking": ["packages/tracking/src/index.ts"],
+      "@slotcity/types": ["packages/types/src/index.ts"],
+      "@slotcity/ui": ["packages/ui/src/index.tsx"]
+    }
+  }
+}

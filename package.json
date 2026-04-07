@@ -1,0 +1,28 @@
+{
+  "name": "slotcity-platform",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["argon2", "esbuild", "sharp"]
+  },
+  "scripts": {
+    "dev": "turbo dev --parallel",
+    "dev:web": "corepack pnpm --filter web dev",
+    "dev:directus": "corepack pnpm --filter directus dev",
+    "dev:events": "corepack pnpm --filter events dev",
+    "build": "turbo build",
+    "budget:web": "node ./infra/scripts/check-route-budgets.mjs",
+    "release:prepare": "node ./deploy/scripts/create-release-bundles.mjs",
+    "smoke:deploy": "node ./deploy/scripts/smoke-check.mjs",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.2"
+  }
+}

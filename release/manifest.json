@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-03-25T09:10:40.250Z",
+  "bundles": [
+    "slotcity-platform-monorepo",
+    "slotcity-web-vercel",
+    "slotcity-render-backend",
+    "slotcity-cloudflare-worker"
+  ]
+}

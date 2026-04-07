@@ -1,0 +1,64 @@
+.slotcity-game-hall {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.slotcity-game-hall-nav {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.slotcity-game-hall-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #91979f;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  outline: none;
+}
+
+.slotcity-game-hall-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 32px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.slotcity-game-hall-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Active State Glow */
+.slotcity-game-hall-tab.is-active .slotcity-game-hall-icon {
+  background: rgba(255, 206, 0, 0.12);
+  border-color: rgba(255, 206, 0, 0.4);
+  box-shadow: 0 0 24px rgba(255, 206, 0, 0.4), inset 0 0 12px rgba(255, 206, 0, 0.2);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.slotcity-game-hall-tab.is-active .slotcity-game-hall-label {
+  color: #ffce00;
+  font-weight: 700;
+}
+
+.slotcity-game-hall-tab:hover:not(.is-active) .slotcity-game-hall-icon {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.02);
+}

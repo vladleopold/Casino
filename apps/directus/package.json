@@ -1,0 +1,20 @@
+{
+  "name": "directus",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "directus start",
+    "start": "directus start",
+    "bootstrap": "directus bootstrap",
+    "seed:route-payloads": "tsx ./scripts/export-route-payloads.ts",
+    "seed:push-route-payloads": "tsx ./scripts/push-route-payloads.ts",
+    "snapshot": "directus schema snapshot ./schema.yml",
+    "typecheck": "node -e \"process.exit(0)\"",
+    "lint": "node -e \"process.exit(0)\""
+  },
+  "dependencies": {
+    "directus": "^11.1.0",
+    "tsx": "^4.20.5"
+  }
+}

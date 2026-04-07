@@ -1,0 +1,3 @@
+WEB_ORIGIN=https://slotcity-web.vercel.app
+DIRECTUS_ORIGIN=https://slotcity-directus.onrender.com
+EVENTS_ORIGIN=https://slotcity-events.onrender.com
