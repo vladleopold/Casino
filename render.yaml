@@ -16,22 +16,21 @@ services:
     runtime: image
     plan: free
     image:
-      url: docker.io/bitnami/minio:latest
+      url: docker.io/minio/minio:latest
+    dockerCommand: minio server /data --address $HOST:$PORT
     autoDeployTrigger: off
     healthCheckPath: /minio/health/live
     envVars:
-      - key: PORT
-        value: 10000
-      - key: MINIO_API_PORT_NUMBER
-        value: 10000
-      - key: MINIO_CONSOLE_PORT_NUMBER
-        value: 10001
       - key: MINIO_ROOT_USER
         generateValue: true
       - key: MINIO_ROOT_PASSWORD
         generateValue: true
-      - key: MINIO_DEFAULT_BUCKETS
-        value: casino-assets
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: MINIO_BROWSER
+        value: "off"
 
   - type: web
     name: casino-directus
