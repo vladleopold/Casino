@@ -112,8 +112,8 @@ services:
     plan: free
     rootDir: release/slotcity-render-backend
     autoDeployTrigger: off
-    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter events build
-    startCommand: corepack pnpm --filter events start
+    buildCommand: corepack pnpm install --frozen-lockfile
+    startCommand: corepack pnpm --filter events exec tsx src/index.ts
     healthCheckPath: /health
     envVars:
       - key: POSTHOG_API_KEY
