@@ -42,8 +42,6 @@ services:
     startCommand: sh -c 'corepack pnpm --filter directus bootstrap && corepack pnpm --filter directus start'
     healthCheckPath: /server/health
     envVars:
-      - key: PORT
-        value: 8055
       - key: PUBLIC_URL
         value: https://casino-directus.onrender.com
       - key: SECRET
@@ -118,8 +116,6 @@ services:
     startCommand: corepack pnpm --filter events start
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: 4000
       - key: POSTHOG_API_KEY
         sync: false
       - key: POSTHOG_HOST
