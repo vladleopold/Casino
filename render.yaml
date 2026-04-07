@@ -40,8 +40,7 @@ services:
     rootDir: release/slotcity-render-backend
     autoDeployTrigger: off
     buildCommand: corepack pnpm install --frozen-lockfile
-    preDeployCommand: corepack pnpm --filter directus bootstrap
-    startCommand: corepack pnpm --filter directus start
+    startCommand: sh -c 'corepack pnpm --filter directus bootstrap && corepack pnpm --filter directus start'
     healthCheckPath: /server/health
     envVars:
       - key: PORT
