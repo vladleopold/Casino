@@ -23,6 +23,9 @@ importers:
       directus:
         specifier: ^11.1.0
         version: 11.16.1(@azure/core-client@1.10.1)(@types/node@22.19.15)(@unhead/vue@1.11.20(vue@3.5.24(typescript@5.9.3)))(encoding@0.1.13)(lodash@4.17.23)(pinia@2.3.1(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3)))(terser@5.46.1)(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.3)
+      tsx:
+        specifier: ^4.20.5
+        version: 4.20.6
 
   apps/events:
     dependencies:
