@@ -11,16 +11,14 @@ services:
     plan: free
     ipAllowList: []
 
-  - type: pserv
+  - type: web
     name: casino-minio
     runtime: image
-    plan: starter
+    plan: free
     image:
       url: docker.io/bitnami/minio:latest
-    disk:
-      name: minio-data
-      mountPath: /bitnami/minio/data
-      sizeGB: 1
+    autoDeployTrigger: off
+    healthCheckPath: /minio/health/live
     envVars:
       - key: PORT
         value: 10000
@@ -38,7 +36,7 @@ services:
   - type: web
     name: casino-directus
     runtime: node
-    plan: starter
+    plan: free
     rootDir: .
     autoDeployTrigger: off
     buildCommand: corepack pnpm install --frozen-lockfile
@@ -98,24 +96,24 @@ services:
       - key: STORAGE_S3_REGION
         value: us-east-1
       - key: STORAGE_S3_ENDPOINT
-        value: http://casino-minio:10000
+        value: https://casino-minio.onrender.com
       - key: STORAGE_S3_FORCE_PATH_STYLE
         value: "true"
       - key: STORAGE_S3_KEY
         fromService:
-          type: pserv
+          type: web
           name: casino-minio
           envVarKey: MINIO_ROOT_USER
       - key: STORAGE_S3_SECRET
         fromService:
-          type: pserv
+          type: web
           name: casino-minio
           envVarKey: MINIO_ROOT_PASSWORD
 
   - type: web
     name: casino-events
     runtime: node
-    plan: starter
+    plan: free
     rootDir: .
     autoDeployTrigger: off
     buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter events build
