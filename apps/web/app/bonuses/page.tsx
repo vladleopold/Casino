@@ -1,11 +1,5 @@
-import { ImportedSourcePage, buildImportedMetadata } from "../components/imported-source-page";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export async function generateMetadata() {
-  return buildImportedMetadata("/bonuses");
-}
-
-export default async function BonusesPage() {
-  return <ImportedSourcePage sourcePath="/bonuses" route="bonuses" />;
+export default function BonusesPage() {
+  redirect("/promotions");
 }
