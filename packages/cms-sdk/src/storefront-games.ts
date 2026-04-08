@@ -412,11 +412,13 @@ export async function getStorefrontGamePage(slugInput: string): Promise<Storefro
 
   const [record, importedPage, pool] = await Promise.all([
     fetchDirectusGame(slug),
-    getImportedPagePayload(`/game/${slug}`),
+    getImportedPagePayload(`/game/${slug}`, {
+      allowUnlistedGame: true
+    }),
     getGamePool()
   ]);
 
-  if (!record && !importedPage) {
+  if (!record && !importedPage && !pool.has(slug)) {
     return null;
   }
 

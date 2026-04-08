@@ -552,10 +552,13 @@ async function fetchRemoteImportedPage(path: string): Promise<ImportedPagePayloa
   return buildPayload(path, html);
 }
 
-export async function getImportedPagePayload(path: string): Promise<ImportedPagePayload | null> {
+export async function getImportedPagePayload(
+  path: string,
+  options?: { allowUnlistedGame?: boolean }
+): Promise<ImportedPagePayload | null> {
   const normalizedPath = normalizeSitePath(path);
 
-  if (normalizedPath.startsWith("/game/")) {
+  if (normalizedPath.startsWith("/game/") && !options?.allowUnlistedGame) {
     const allowedGames = await getPopularGamePaths();
 
     if (!allowedGames.has(normalizedPath)) {
