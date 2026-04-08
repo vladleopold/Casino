@@ -77,6 +77,10 @@ const DIRECTUS_FETCH_TIMEOUT_MS = Number.parseInt(
   process.env.DIRECTUS_FETCH_TIMEOUT_MS ?? "6000",
   10
 );
+const SOURCE_SITE_URL = (process.env.SLOTCITY_SOURCE_SITE_URL ?? "https://slotcity.ua").replace(
+  /\/$/,
+  ""
+);
 const FALLBACK_DEMO_SOURCE_LABEL = "Демо на SlotCity";
 
 let gamePoolPromise: Promise<Map<string, GameTileContent>> | null = null;
@@ -365,10 +369,11 @@ function buildLaunchConfig(
   sourceUrl: string | undefined,
   record: DirectusStorefrontGameRecord | null
 ): StorefrontGameLaunchContent {
+  const fallbackDemoUrl = sourceUrl || `${SOURCE_SITE_URL}/game/${slug}`;
   const demoUrl =
     (typeof record?.demo_url === "string" && record.demo_url.length > 0
       ? record.demo_url
-      : sourceUrl) || undefined;
+      : fallbackDemoUrl) || undefined;
 
   return {
     mode:
