@@ -6699,8 +6699,323 @@ a {
     margin-top: -24px;
   }
 
-  .menu-btn-inner {
-    width: 56px;
-    height: 56px;
+.menu-btn-inner {
+  width: 56px;
+  height: 56px;
+}
+}
+
+.slotcity-game-page {
+  padding-bottom: 144px;
+}
+
+.slotcity-game-shell {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 0;
+}
+
+.slotcity-game-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.84rem;
+  margin-bottom: 18px;
+}
+
+.slotcity-game-breadcrumb-link {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.slotcity-game-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.slotcity-game-copy,
+.slotcity-game-launch-shell,
+.slotcity-game-fact-card,
+.slotcity-game-editorial {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top right, rgba(46, 211, 154, 0.12), transparent 28%),
+    rgba(9, 13, 19, 0.92);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.32);
+}
+
+.slotcity-game-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 30px;
+}
+
+.slotcity-game-copy h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.slotcity-game-copy p {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.slotcity-game-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slotcity-game-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.slotcity-game-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.slotcity-game-highlight-card {
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.slotcity-game-highlight-kicker {
+  display: inline-flex;
+  margin-bottom: 14px;
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.slotcity-game-highlight-card strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.slotcity-game-launch-shell {
+  padding: 18px;
+}
+
+.slotcity-game-launcher {
+  display: grid;
+  gap: 16px;
+}
+
+.slotcity-game-launcher-surface {
+  min-height: 460px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(9, 13, 19, 0.98), rgba(8, 11, 15, 0.94));
+}
+
+.slotcity-game-launcher-tabs {
+  display: inline-flex;
+  gap: 8px;
+  padding: 14px 14px 0;
+}
+
+.slotcity-game-launcher-tab {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.slotcity-game-launcher-tab.is-active {
+  background: var(--gold);
+  color: #0a0d12;
+}
+
+.slotcity-game-launcher-embed {
+  position: relative;
+  min-height: 406px;
+  padding: 14px;
+}
+
+.slotcity-game-launcher-embed iframe {
+  width: 100%;
+  min-height: 392px;
+  border: 0;
+  border-radius: 18px;
+  background: #090b10;
+}
+
+.slotcity-game-launcher-preview {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 460px;
+}
+
+.slotcity-game-launcher-preview-image {
+  object-fit: cover;
+}
+
+.slotcity-game-launcher-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 7, 10, 0.14), rgba(6, 7, 10, 0.84)),
+    linear-gradient(90deg, rgba(6, 7, 10, 0.72), rgba(6, 7, 10, 0.12));
+}
+
+.slotcity-game-launcher-preview-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+  padding: 28px;
+}
+
+.slotcity-game-launcher-preview-copy strong {
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 0.98;
+}
+
+.slotcity-game-launcher-preview-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.slotcity-game-launcher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.slotcity-game-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.slotcity-game-fact-card {
+  padding: 18px 20px;
+}
+
+.slotcity-game-fact-card span {
+  display: block;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.slotcity-game-fact-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.02rem;
+}
+
+.slotcity-game-editorial {
+  margin-top: 18px;
+  padding: 22px 24px;
+}
+
+.slotcity-game-editorial-html {
+  max-width: none;
+}
+
+.slotcity-game-related {
+  margin-top: 22px;
+}
+
+@media (max-width: 1080px) {
+  .slotcity-game-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .slotcity-game-highlights,
+  .slotcity-game-facts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .slotcity-game-shell {
+    width: min(100% - 16px, 720px);
+    padding-top: 14px;
+  }
+
+  .slotcity-game-copy,
+  .slotcity-game-launch-shell,
+  .slotcity-game-editorial {
+    border-radius: 24px;
+  }
+
+  .slotcity-game-copy {
+    padding: 22px 18px;
+  }
+
+  .slotcity-game-copy h1 {
+    font-size: 2.3rem;
+  }
+
+  .slotcity-game-highlights,
+  .slotcity-game-facts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .slotcity-game-highlight-card {
+    min-height: auto;
+  }
+
+  .slotcity-game-launcher-surface,
+  .slotcity-game-launcher-preview {
+    min-height: 320px;
+  }
+
+  .slotcity-game-launcher-embed {
+    min-height: 286px;
+    padding: 10px;
+  }
+
+  .slotcity-game-launcher-embed iframe {
+    min-height: 266px;
+  }
+
+  .slotcity-game-launcher-preview-copy {
+    padding: 18px;
+  }
+
+  .slotcity-game-launcher-preview-copy strong {
+    font-size: 2rem;
   }
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { useSlotcityAnalytics } from "./analytics-context";
+import { TrackedLink } from "./tracked-link";
 
 interface TrackedGameCardProps {
   title: string;
@@ -23,23 +23,22 @@ export function TrackedGameCard({
   shelfId,
   position
 }: TrackedGameCardProps) {
-  const { capture } = useSlotcityAnalytics();
+  const href = `/game/${gameId}`;
 
   return (
-    <button
-      type="button"
+    <TrackedLink
+      href={href}
       className="slotcity-game-card slotcity-game-card-button"
-      onClick={() => {
-        void capture("game_card_opened", {
-          gameId,
-          shelfId,
-          position,
-          providerId: provider,
-          properties: {
-            title,
-            provider
-          }
-        });
+      event="game_card_opened"
+      payload={{
+        gameId,
+        shelfId,
+        position,
+        providerId: provider,
+        properties: {
+          title,
+          provider
+        }
       }}
     >
       <div className="slotcity-game-media">
@@ -50,6 +49,6 @@ export function TrackedGameCard({
         <strong>{title}</strong>
         <span>{provider}</span>
       </div>
-    </button>
+    </TrackedLink>
   );
 }

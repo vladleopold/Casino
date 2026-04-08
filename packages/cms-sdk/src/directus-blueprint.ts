@@ -21,6 +21,23 @@ export const directusStorefrontCollections = [
     fields: ["page_slug", "position", "label", "href"]
   },
   {
+    collection: "storefront_games",
+    purpose: "Directus-managed game pages with hero, launch, demo, and provider fields",
+    fields: [
+      "slug",
+      "name",
+      "heading",
+      "provider_name",
+      "game_type",
+      "launch_mode",
+      "launch_url",
+      "demo_url",
+      "hero_image",
+      "hero_image_url",
+      "content_html"
+    ]
+  },
+  {
     collection: "storefront_banners",
     purpose: "banner, hero slider, promo slider, and visual promo records",
     fields: ["route", "kind", "position", "title", "body", "image", "image_url"]

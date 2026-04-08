@@ -213,6 +213,50 @@ export interface ImportedPagePayload {
   extractedAt: string;
 }
 
+export type StorefrontGameType = "slot" | "live";
+
+export type StorefrontGameLaunchMode = "none" | "iframe" | "external";
+
+export interface StorefrontGameFactContent {
+  label: string;
+  value: string;
+}
+
+export interface StorefrontGameLaunchContent {
+  mode: StorefrontGameLaunchMode;
+  launchUrl?: string;
+  demoUrl?: string;
+  launchLabel: string;
+  demoLabel: string;
+  requiresAuth: boolean;
+  openInNewTab: boolean;
+  providerGameId?: string;
+  providerSlug?: string;
+}
+
+export interface StorefrontGamePage {
+  slug: string;
+  path: string;
+  name: string;
+  title: string;
+  heading: string;
+  kicker: string;
+  description: string;
+  provider: string;
+  gameType: StorefrontGameType;
+  accent: "gold" | "green" | "blue" | "violet";
+  heroImage?: string;
+  heroImageAlt: string;
+  badges: string[];
+  highlights: string[];
+  facts: StorefrontGameFactContent[];
+  contentHtml: string;
+  sourceUrl?: string;
+  extractedAt?: string;
+  launch: StorefrontGameLaunchContent;
+  relatedGames: GameTileContent[];
+}
+
 export interface MarketingHeroContent {
   kicker: string;
   title: string;

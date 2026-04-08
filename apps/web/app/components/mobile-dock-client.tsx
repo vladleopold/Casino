@@ -43,6 +43,8 @@ export function MobileDockClient({ items }: { items: MobileDockItemContent[] }) 
       isActive = pathname === (baseHref || "/") && hash === `#${anchor}`;
     } else if (href === "/") {
       isActive = pathname === "/" && !activeModal;
+    } else if (baseHref === "/catalog" && pathname.startsWith("/game/")) {
+      isActive = true;
     } else {
       isActive = pathname.startsWith(baseHref || href);
     }
