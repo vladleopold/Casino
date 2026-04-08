@@ -1,13 +1,37 @@
 "use client";
 
-import type { Route } from "next";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { TrackedButton } from "./tracked-button";
+import { TrackedLink } from "./tracked-link";
+
+const quickLinks = [
+  { label: "Каталог", href: "/catalog", kicker: "Ігри" },
+  { label: "Live", href: "/live", kicker: "Швидко" },
+  { label: "Бонуси", href: "/bonuses", kicker: "Промо" },
+  { label: "CITY VIP", href: "/vip", kicker: "Club" }
+];
+
+const primaryLinks = [
+  { label: "Головна", href: "/", note: "Поточна вітрина та нові банери" },
+  { label: "Каталог слотів", href: "/catalog", note: "Пошук за грою, провайдером і колекцією" },
+  { label: "Live casino", href: "/live", note: "Рулетка, blackjack, wheel-show та VIP столи" }
+];
+
+const promoLinks = [
+  { label: "Бонуси", href: "/bonuses", note: "Вітальний пакет, кешбек і фриспіни" },
+  { label: "Акції", href: "/promotions", note: "Поточні кампанії та сезонні офери" },
+  { label: "Турніри", href: "/tournaments", note: "Щоденні гонки та таблиці лідерів" },
+  { label: "CITY VIP", href: "/vip", note: "Преміальний клуб і персональні пропозиції" }
+];
+
+const supportLinks = [
+  { label: "Мобільний застосунок", href: "/registration", note: "Встановлення на iOS та Android" },
+  { label: "Правила та умови", href: "/promotions", note: "Основні правила, ліміти та вивід" },
+  { label: "Відповідальна гра", href: "/bonuses", note: "Самообмеження та корисні контакти" }
+];
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const searchParams = useSearchParams();
-  const isLoggedIn = searchParams.get("auth") !== "guest";
+  const isLoggedIn = searchParams.get("auth") === "member";
 
   return (
     <>
@@ -18,165 +42,176 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       />
       <aside className={`slotcity-sidebar ${isOpen ? "is-open" : ""}`}>
         <div className="slotcity-sidebar-header">
-           <button 
-            type="button" 
-            className="slotcity-icon-button slotcity-sidebar-close" 
+          <button
+            type="button"
+            className="slotcity-icon-button slotcity-sidebar-close"
             aria-label="Close menu"
             onClick={onClose}
           >
             <span>✕</span>
           </button>
+          <img src="/slotcity/brand/logo-mini.svg" alt="SlotCity" className="slotcity-sidebar-logo" />
           {isLoggedIn ? (
-            <>
-              <div className="slotcity-sidebar-user-id">
-                <span>ID: 5876258</span>
-                <button type="button" className="slotcity-copy-button">📄</button>
-              </div>
-              <button type="button" className="slotcity-settings-button">⚙️</button>
-            </>
+            <div className="slotcity-sidebar-user-id">
+              <span>ID: 5876258</span>
+              <button type="button" className="slotcity-copy-button">📄</button>
+            </div>
           ) : (
-            <div className="slotcity-sidebar-guest-header-actions">
-              <button type="button" className="slotcity-sidebar-search-btn" aria-label="Search">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-                </svg>
-              </button>
-              <button type="button" className="slotcity-sidebar-random-btn">
-                <span>Випадкова</span>
-              </button>
+            <div className="slotcity-sidebar-guest-auth">
+              <TrackedLink
+                href="/registration?mode=login"
+                className="slotcity-sidebar-auth-link slotcity-sidebar-auth-link-dark"
+                event="cta_clicked"
+                payload={{ properties: { placement: "sidebar_login" } }}
+              >
+                Увійти
+              </TrackedLink>
+              <TrackedLink
+                href="/registration"
+                className="slotcity-sidebar-auth-link slotcity-sidebar-auth-link-primary"
+                event="cta_clicked"
+                payload={{ properties: { placement: "sidebar_register" } }}
+              >
+                Реєстрація
+              </TrackedLink>
             </div>
           )}
         </div>
 
-        {isLoggedIn ? (
-          <>
-            <div className="slotcity-sidebar-user-info">
-              <div className="slotcity-sidebar-user-name">vladyslavchaplygin</div>
-              <div className="slotcity-sidebar-user-status">Не верифіковано</div>
-            </div>
+        <div className="slotcity-sidebar-body">
+          {isLoggedIn ? (
+            <div className="slotcity-sidebar-account-card">
+              <div className="slotcity-sidebar-user-info">
+                <div className="slotcity-sidebar-user-name">vladyslavchaplygin</div>
+                <div className="slotcity-sidebar-user-status">Не верифіковано</div>
+              </div>
 
-            <div className="slotcity-sidebar-progress-bar">
-               <div className="slotcity-sidebar-progress-label">
-                <span>До 1-го рівня</span>
-                <span>2 / 6</span>
-               </div>
-               <div className="slotcity-sidebar-progress-track">
-                 <div className="slotcity-sidebar-progress-fill" style={{ width: "33%" }} />
-               </div>
-            </div>
+              <div className="slotcity-sidebar-progress-bar">
+                <div className="slotcity-sidebar-progress-label">
+                  <span>До 1-го рівня</span>
+                  <span>2 / 6</span>
+                </div>
+                <div className="slotcity-sidebar-progress-track">
+                  <div className="slotcity-sidebar-progress-fill" style={{ width: "33%" }} />
+                </div>
+              </div>
 
-            <button type="button" className="slotcity-sidebar-verify-banner">
+              <button type="button" className="slotcity-sidebar-verify-banner">
                 <span>Пройди верифікацію – отримай 50 ФС бездеп</span>
                 <span>→</span>
-            </button>
-
-            <div className="slotcity-sidebar-quick-actions">
-               <div className="slotcity-sidebar-action-item">
-                 <div className="slotcity-sidebar-action-icon gold">B</div>
-                 <span>Бонуси</span>
-                 <span className="slotcity-sidebar-action-badge">2</span>
-               </div>
-               <div className="slotcity-sidebar-action-item">
-                 <div className="slotcity-sidebar-action-icon yellow">M</div>
-                 <span>Місії</span>
-                 <span className="slotcity-sidebar-action-badge">6</span>
-               </div>
-               <div className="slotcity-sidebar-action-item">
-                 <div className="slotcity-sidebar-action-icon purple">B</div>
-                 <span>Бейджи</span>
-               </div>
-               <div className="slotcity-sidebar-action-item">
-                 <div className="slotcity-sidebar-action-icon green">S</div>
-                 <span>Магазин</span>
-               </div>
+              </button>
             </div>
-          </>
-        ) : (
-          <div className="slotcity-sidebar-guest-hero">
-            <div className="slotcity-sidebar-welcome-card">
-              <div className="welcome-card-content">
-                <div className="welcome-card-kicker">Вітальний бонус</div>
-                <div className="welcome-card-title">
-                  <strong>500 000 ₴</strong>
-                  <span>+ 700 ФС</span>
-                </div>
-                
-                <div className="welcome-card-gifts">
-                  <div className="welcome-gift">
-                    <div className="gift-icon">🎁</div>
-                    <span>150 000 ₴</span>
-                  </div>
-                  <div className="welcome-gift">
-                    <div className="gift-icon">🎁</div>
-                    <span>200 000 ₴</span>
-                  </div>
-                  <div className="welcome-gift">
-                    <div className="gift-icon">🎁</div>
-                    <span>150 000 ₴</span>
-                  </div>
-                </div>
-
-                <TrackedButton
-                  className="welcome-card-button"
+          ) : (
+            <section className="slotcity-sidebar-hero-card">
+              <span className="slotcity-sidebar-hero-kicker">Вітальний бонус</span>
+              <h2 className="slotcity-sidebar-hero-title">500 000 ₴ + 700 ФС</h2>
+              <p className="slotcity-sidebar-hero-copy">
+                Швидкий старт для нових гравців SlotCity з прямим входом у слоти, live та бонуси.
+              </p>
+              <div className="slotcity-sidebar-hero-actions">
+                <TrackedLink
+                  href="/registration"
+                  className="slotcity-cta slotcity-cta-primary slotcity-sidebar-hero-action"
                   event="cta_clicked"
-                  payload={{ properties: { placement: "sidebar_welcome_bonus" } }}
+                  payload={{ properties: { placement: "sidebar_welcome_register" } }}
                 >
-                  Отримати
-                </TrackedButton>
+                  Отримати бонус
+                </TrackedLink>
+                <TrackedLink
+                  href="/registration?mode=login"
+                  className="slotcity-cta slotcity-cta-secondary slotcity-sidebar-hero-action"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_welcome_login" } }}
+                >
+                  Увійти
+                </TrackedLink>
               </div>
+            </section>
+          )}
+
+          <section className="slotcity-sidebar-quick-grid" aria-label="Швидкі переходи">
+            {quickLinks.map((item) => (
+              <TrackedLink
+                key={item.href}
+                href={item.href}
+                className="slotcity-sidebar-quick-link"
+                event="cta_clicked"
+                payload={{ properties: { placement: "sidebar_quick_link", label: item.label } }}
+              >
+                <span className="slotcity-sidebar-quick-kicker">{item.kicker}</span>
+                <strong>{item.label}</strong>
+              </TrackedLink>
+            ))}
+          </section>
+
+          <section className="slotcity-sidebar-section">
+            <strong className="slotcity-sidebar-section-title">Основне</strong>
+            <nav className="slotcity-sidebar-link-list">
+              {primaryLinks.map((item) => (
+                <TrackedLink
+                  key={item.href}
+                  href={item.href}
+                  className="slotcity-sidebar-link-row"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_nav", label: item.label } }}
+                >
+                  <span className="slotcity-sidebar-link-copy">
+                    <strong>{item.label}</strong>
+                    <small>{item.note}</small>
+                  </span>
+                  <span className="slotcity-sidebar-link-arrow">›</span>
+                </TrackedLink>
+              ))}
+            </nav>
+          </section>
+
+          <section className="slotcity-sidebar-section">
+            <strong className="slotcity-sidebar-section-title">Промо</strong>
+            <div className="slotcity-sidebar-link-list">
+              {promoLinks.map((item) => (
+                <TrackedLink
+                  key={item.href}
+                  href={item.href}
+                  className="slotcity-sidebar-link-row"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_promo", label: item.label } }}
+                >
+                  <span className="slotcity-sidebar-link-copy">
+                    <strong>{item.label}</strong>
+                    <small>{item.note}</small>
+                  </span>
+                  <span className="slotcity-sidebar-link-arrow">›</span>
+                </TrackedLink>
+              ))}
             </div>
+          </section>
+
+          <section className="slotcity-sidebar-section">
+            <strong className="slotcity-sidebar-section-title">Підтримка</strong>
+            <div className="slotcity-sidebar-link-list">
+              {supportLinks.map((item) => (
+                <TrackedLink
+                  key={item.href}
+                  href={item.href}
+                  className="slotcity-sidebar-link-row"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_support", label: item.label } }}
+                >
+                  <span className="slotcity-sidebar-link-copy">
+                    <strong>{item.label}</strong>
+                    <small>{item.note}</small>
+                  </span>
+                  <span className="slotcity-sidebar-link-arrow">›</span>
+                </TrackedLink>
+              ))}
+            </div>
+          </section>
+
+          <div className="slotcity-sidebar-apps">
+            <span className="slotcity-sidebar-apps-label">Застосунок SlotCity</span>
+            <button className="slotcity-sidebar-app-button">App Store</button>
+            <button className="slotcity-sidebar-app-button">Google Play</button>
           </div>
-        )}
-
-        <nav className="slotcity-sidebar-nav-grid">
-           <Link href={"/catalog" as Route} className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">🎮</div>
-             <span>Ігри</span>
-           </Link>
-           <button className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">❤️</div>
-             <span>Улюблені</span>
-           </button>
-           <button className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">💼</div>
-             <span>Провайдери</span>
-           </button>
-           <Link href={"/tournaments" as Route} className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">🏆</div>
-             <span>Турніри</span>
-           </Link>
-           <button className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">🎁</div>
-             <span>Розіграші</span>
-           </button>
-           <Link href={"/promotions" as Route} className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">🔥</div>
-             <span>Акції</span>
-           </Link>
-           <button className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">📊</div>
-             <span>Рівні</span>
-           </button>
-           <Link href={"/vip" as Route} className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">👑</div>
-             <span>CITY VIP</span>
-           </Link>
-           <Link href={"/tournaments" as Route} className="slotcity-sidebar-nav-item">
-             <div className="slotcity-sidebar-nav-icon">🍀</div>
-             <span>Сезон удачі</span>
-           </Link>
-        </nav>
-
-        <div className="slotcity-sidebar-footer-links">
-          <button className="slotcity-sidebar-footer-link">Промокод</button>
-          <button className="slotcity-sidebar-footer-link">Моє Сіті</button>
-          <button className="slotcity-sidebar-footer-link">Деталі</button>
-          <button className="slotcity-sidebar-footer-link">Підтримка MyCity</button>
-        </div>
-
-        <div className="slotcity-sidebar-apps">
-           <button className="slotcity-sidebar-app-button">Download on App Store</button>
-           <button className="slotcity-sidebar-app-button">Get it on Google Play</button>
         </div>
       </aside>
     </>

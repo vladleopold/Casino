@@ -62,3 +62,45 @@
   background: rgba(255, 255, 255, 0.08);
   transform: scale(1.02);
 }
+
+@media (max-width: 640px) {
+  .slotcity-game-hall {
+    gap: 16px;
+  }
+
+  .slotcity-game-hall .slotcity-category-nav {
+    gap: 8px;
+    padding: 4px 0 12px;
+  }
+
+  .slotcity-game-hall .slotcity-category-item {
+    flex-direction: row;
+    gap: 0;
+    width: auto;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .slotcity-game-hall .slotcity-category-icon {
+    display: none;
+  }
+
+  .slotcity-game-hall .slotcity-category-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .slotcity-game-hall .slotcity-game-hall-tab.is-active {
+    background: rgba(255, 206, 0, 0.12);
+    border-color: rgba(255, 206, 0, 0.32);
+    box-shadow: inset 0 0 0 1px rgba(255, 206, 0, 0.08);
+  }
+
+  .slotcity-game-hall .slotcity-game-hall-tab.is-active .slotcity-category-label {
+    color: #ffce00;
+  }
+}

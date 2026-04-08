@@ -2,84 +2,29 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import type { HeroSliderSlideContent } from "@slotcity/cms-sdk";
 
 import { TrackedLink } from "./tracked-link";
 
-const HERO_SLIDES = [
-  {
-    id: "welcome-lucky-season",
-    eyebrow: "Вітальний бонус",
-    title: "500 000 ₴ + 700 ФС",
-    body:
-      "Бонус на перші депозити та швидкий старт для нових гравців у SlotCity.",
-    image: "/slotcity/assets/promos/welcome-lucky-season-slider.webp",
-    accent: "gold",
-    primaryHref: "/bonuses",
-    primaryLabel: "Отримати бонус",
-    secondaryHref: "/promotions",
-    secondaryLabel: "Деталі акції",
-    chips: ["Новим гравцям", "7 депозитів", "700 ФС"],
-    stats: [
-      { label: "100%", value: "+25 ФС" },
-      { label: "150%", value: "+50 ФС" },
-      { label: "200%", value: "+300%+" }
-    ]
-  },
-  {
-    id: "city-vip-slider",
-    eyebrow: "CITY VIP",
-    title: "Увійди до кола обраних City VIP",
-    body:
-      "Персональні подарунки, окремі турніри та пріоритетна підтримка.",
-    image: "/slotcity/assets/promos/city-vip-slider.webp",
-    accent: "violet",
-    primaryHref: "/vip",
-    primaryLabel: "Дивитися VIP",
-    secondaryHref: "/catalog",
-    secondaryLabel: "Відкрити ігри",
-    chips: ["VIP club", "Персональні офери", "Преміум турніри"],
-    stats: [
-      { label: "VIP", value: "Статус" },
-      { label: "CRM", value: "Персонально" },
-      { label: "Fast lane", value: "Пріоритет" }
-    ]
-  },
-  {
-    id: "lucky-season",
-    eyebrow: "Сезон удачі",
-    title: "Злови удачу у Столиці Розваг",
-    body:
-      "Щоденні промо, турніри та швидкий перехід до потрібних слотів.",
-    image: "/slotcity/assets/tournaments/lucky-season-promo-desktop.webp",
-    accent: "green",
-    primaryHref: "/tournaments",
-    primaryLabel: "Перейти до акцій",
-    secondaryHref: "/catalog",
-    secondaryLabel: "Дивитися слоти",
-    chips: ["Щоденні розіграші", "Турніри", "Lucky journey"],
-    stats: [
-      { label: "Daily", value: "Промо" },
-      { label: "Drops", value: "Подарунки" },
-      { label: "CTA", value: "Швидкий вхід" }
-    ]
-  }
-];
-
 const AUTOPLAY_MS = 5600;
 
-export function HeroSlider() {
+export function HeroSlider({ slides }: { slides: HeroSliderSlideContent[] }) {
+  if (slides.length === 0) {
+    return null;
+  }
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const activeSlide = HERO_SLIDES[currentIndex];
+  const activeSlide = slides[currentIndex];
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   const previousSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
     if (isPaused) {
@@ -111,6 +56,11 @@ export function HeroSlider() {
             />
             <div className="slotcity-hero-slider-overlay" />
             <div className="slotcity-hero-slider-sheen" />
+          </div>
+
+          <div className="slotcity-hero-slider-mobile-copy">
+            <span className="slotcity-hero-slider-mobile-kicker">{activeSlide.eyebrow}</span>
+            <strong className="slotcity-hero-slider-mobile-title">{activeSlide.title}</strong>
           </div>
 
           <div className="slotcity-hero-slider-content">
@@ -202,7 +152,7 @@ export function HeroSlider() {
         </div>
 
         <div className="slotcity-hero-slider-pagination" aria-label="Навігація банерів">
-          {HERO_SLIDES.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               key={slide.id}
               type="button"

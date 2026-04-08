@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { ImportedSourcePage, buildImportedMetadata } from "../components/imported-source-page";
 
-export default function SlotsPage() {
-  redirect("/catalog");
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return buildImportedMetadata("/casino");
+}
+
+export default async function SlotsPage() {
+  return <ImportedSourcePage sourcePath="/casino" route="catalog" />;
 }

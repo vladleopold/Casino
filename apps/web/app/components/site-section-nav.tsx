@@ -4,13 +4,19 @@ import type { Route } from "next";
 
 import { TrackedLink } from "./tracked-link";
 
-const navItems: Array<{ label: string; href: string; match: string[] }> = [
-  { label: "Головна", href: "/", match: ["home"] },
-  { label: "Слоти", href: "/slots", match: ["catalog", "slots", "casino"] },
-  { label: "Live casino", href: "/live", match: ["live"] },
-  { label: "Бонуси", href: "/bonuses", match: ["promotions", "bonuses", "registration"] },
-  { label: "CITY VIP", href: "/vip", match: ["vip"] },
-  { label: "Турніри", href: "/tournaments", match: ["tournaments"] }
+const navItems: Array<{
+  label: string;
+  shortLabel?: string;
+  href: string;
+  match: string[];
+  mobileSecondary?: boolean;
+}> = [
+  { label: "Головна", shortLabel: "Головна", href: "/", match: ["home"] },
+  { label: "Слоти", shortLabel: "Слоти", href: "/catalog", match: ["catalog", "slots", "casino"] },
+  { label: "Live casino", shortLabel: "Live", href: "/live", match: ["live"] },
+  { label: "Бонуси", shortLabel: "Бонуси", href: "/bonuses", match: ["promotions", "bonuses", "registration"] },
+  { label: "CITY VIP", shortLabel: "VIP", href: "/vip", match: ["vip"], mobileSecondary: true },
+  { label: "Турніри", shortLabel: "Турніри", href: "/tournaments", match: ["tournaments"], mobileSecondary: true }
 ];
 
 export function SiteSectionNav({ route = "home" }: { route?: string }) {
@@ -20,7 +26,7 @@ export function SiteSectionNav({ route = "home" }: { route?: string }) {
         <TrackedLink
           key={item.href}
           href={item.href as Route}
-          className={`slotcity-section-nav-link${item.match.includes(route) ? " is-active" : ""}`}
+          className={`slotcity-section-nav-link${item.match.includes(route) ? " is-active" : ""}${item.mobileSecondary ? " is-mobile-secondary" : ""}`}
           event="cta_clicked"
           payload={{
             properties: {
@@ -30,7 +36,8 @@ export function SiteSectionNav({ route = "home" }: { route?: string }) {
             }
           }}
         >
-          {item.label}
+          <span className="slotcity-section-nav-label-full">{item.label}</span>
+          <span className="slotcity-section-nav-label-short">{item.shortLabel ?? item.label}</span>
         </TrackedLink>
       ))}
     </nav>

@@ -1,8 +1,44 @@
 export const directusStorefrontCollections = [
   {
+    collection: "storefront_imported_pages",
+    purpose: "field-based mirrored SlotCity pages rendered inside the mobile shell",
+    fields: [
+      "slug",
+      "locale",
+      "page_type",
+      "shell_route",
+      "title",
+      "heading",
+      "description",
+      "hero_image",
+      "hero_image_url",
+      "content_html"
+    ]
+  },
+  {
+    collection: "storefront_imported_breadcrumbs",
+    purpose: "repeatable breadcrumb rows for mirrored SlotCity pages",
+    fields: ["page_slug", "position", "label", "href"]
+  },
+  {
+    collection: "storefront_banners",
+    purpose: "banner, hero slider, promo slider, and visual promo records",
+    fields: ["route", "kind", "position", "title", "body", "image", "image_url"]
+  },
+  {
     collection: "storefront_pages",
-    purpose: "page-level entries for home, catalog, and live",
-    fields: ["slug", "title", "kicker", "body", "navigation", "actions"]
+    purpose: "fallback page-level JSON entries for home, catalog, and live",
+    fields: ["slug", "payload", "status"]
+  },
+  {
+    collection: "storefront_sections",
+    purpose: "singleton text and chrome sections for home, catalog, and live",
+    fields: ["route", "section_key", "title", "body", "image", "badge", "pill_label"]
+  },
+  {
+    collection: "storefront_section_items",
+    purpose: "repeatable cards, links, chips, CTA buttons, and info rows",
+    fields: ["route", "section_key", "item_type", "label", "title", "href", "position"]
   },
   {
     collection: "storefront_navigation_links",

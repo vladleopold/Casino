@@ -1,5 +1,7 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -106,6 +108,71 @@ function createReleaseReadme() {
   writeFileSync(path.join(releaseRoot, "README.md"), content, "utf8");
 }
 
+function writeUploadInstructions() {
+  const content = [
+    "# Upload Instructions",
+    "",
+    "Default archive:",
+    "",
+    "- `slotcity-deployment-bundle.zip`",
+    "",
+    "Inside the bundle:",
+    "",
+    "- `slotcity-platform-monorepo.zip` — full repository snapshot for Git-based deployment",
+    "- `slotcity-web-vercel.zip` — frontend package for Vercel",
+    "- `slotcity-render-backend.zip` — Directus and events package for Render",
+    "- `slotcity-cloudflare-worker.zip` — Cloudflare Worker package",
+    "",
+    "Quick handoff order:",
+    "",
+    "1. Upload `slotcity-web-vercel.zip` to the frontend team or connect it to Vercel.",
+    "2. Upload `slotcity-render-backend.zip` to the backend team or use it for Render services.",
+    "3. Upload `slotcity-cloudflare-worker.zip` for the public edge worker.",
+    "4. Keep `slotcity-platform-monorepo.zip` as the full backup and source-of-truth package.",
+    "",
+    "Integrity check:",
+    "",
+    "```bash",
+    "cd /Volumes/Work/Casino/release",
+    "LC_ALL=C LANG=C shasum -a 256 -c CHECKSUMS.sha256",
+    "```",
+    ""
+  ].join("\n");
+
+  writeFileSync(path.join(releaseRoot, "UPLOAD_INSTRUCTIONS.md"), content, "utf8");
+}
+
+function createArchive(archiveName, entries) {
+  const archivePath = path.join(releaseRoot, archiveName);
+  rmSync(archivePath, { force: true });
+
+  execFileSync("zip", ["-qr", archiveName, ...entries], {
+    cwd: releaseRoot,
+    stdio: "inherit"
+  });
+}
+
+function createSha256(filePath) {
+  const hash = createHash("sha256");
+  hash.update(readFileSync(filePath));
+  return hash.digest("hex");
+}
+
+function timestampLabel(date = new Date()) {
+  const iso = date.toISOString().replace(/[-:]/g, "");
+  const [day, time] = iso.split("T");
+  return `${day.slice(0, 8)}-${time.slice(0, 6)}`;
+}
+
+function writeChecksums(files) {
+  const lines = files.map((file) => {
+    const digest = createSha256(path.join(releaseRoot, file));
+    return `${digest}  ${file}`;
+  });
+
+  writeFileSync(path.join(releaseRoot, "CHECKSUMS.sha256"), `${lines.join("\n")}\n`, "utf8");
+}
+
 resetDir(releaseRoot);
 
 createBundle(
@@ -209,5 +276,30 @@ writeFileSync(
   `${JSON.stringify(manifest, null, 2)}\n`,
   "utf8"
 );
+
+writeUploadInstructions();
+
+const bundleArchives = manifest.bundles.map((bundleName) => `${bundleName}.zip`);
+
+for (const bundleName of manifest.bundles) {
+  createArchive(`${bundleName}.zip`, [bundleName]);
+}
+
+const deploymentBundleEntries = [
+  "README.md",
+  "UPLOAD_INSTRUCTIONS.md",
+  "manifest.json",
+  ...bundleArchives
+];
+const timestampedDeploymentBundle = `slotcity-deployment-bundle-${timestampLabel()}.zip`;
+
+createArchive("slotcity-deployment-bundle.zip", deploymentBundleEntries);
+createArchive(timestampedDeploymentBundle, deploymentBundleEntries);
+
+writeChecksums([
+  ...bundleArchives,
+  "slotcity-deployment-bundle.zip",
+  timestampedDeploymentBundle
+]);
 
 console.log(`Release bundles created at ${releaseRoot}`);

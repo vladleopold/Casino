@@ -3,10 +3,10 @@
   "name": "slotcity-edge",
   "main": "src/index.ts",
   "compatibility_date": "2025-02-01",
-  "workers_dev": false,
+  "workers_dev": true,
   "vars": {
-    "WEB_ORIGIN": "https://slotcity-web.vercel.app",
-    "DIRECTUS_ORIGIN": "https://slotcity-directus.onrender.com",
-    "EVENTS_ORIGIN": "https://slotcity-events.onrender.com"
+    "WEB_ORIGIN": "https://web-iota-neon-58.vercel.app",
+    "DIRECTUS_ORIGIN": "https://casino-directus.onrender.com",
+    "EVENTS_ORIGIN": "https://casino-events.onrender.com"
   }
 }

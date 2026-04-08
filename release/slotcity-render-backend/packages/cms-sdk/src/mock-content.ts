@@ -126,6 +126,8 @@ export const mockCatalogPageData: CatalogPageData = {
     title: "Каталог слотів",
     body:
       "Пошук по назві гри, провайдеру, бонусним слотам і live casino без порожніх технічних екранів та зайвого пошуку.",
+    image: "/slotcity/assets/hero-card-live.webp",
+    imageAlt: "Каталог слотів",
     actions: [
       { id: "home", label: "На головну", href: "/", variant: "secondary" },
       { id: "live", label: "Відкрити Live", href: "/live", variant: "primary" }
@@ -143,6 +145,8 @@ export const mockCatalogPageData: CatalogPageData = {
   console: {
     label: "Пошук / Фільтри",
     badge: "7000+ ігор",
+    image: "/slotcity/assets/promos/city-vip-slider.webp",
+    imageAlt: "Пошук і добірки слотів",
     searchPlaceholder: "Введи назву гри...",
     searchShortcut: "⌘K",
     chips: [
@@ -244,6 +248,8 @@ export const mockLivePageData: LivePageData = {
     title: "Live casino",
     body:
       "Рулетка, blackjack, wheel-шоу та VIP-сцени повинні відкриватися швидко: без довгого пошуку, без технічної порожнечі та з правильним quick return прямо з lobby.",
+    image: "/slotcity/assets/promos/city-vip-slider.webp",
+    imageAlt: "Live casino hero",
     actions: [
       { id: "home", label: "На головну", href: "/", variant: "secondary" },
       { id: "catalog", label: "До каталогу", href: "/catalog", variant: "primary" }
@@ -258,6 +264,9 @@ export const mockLivePageData: LivePageData = {
     featuredLabel: "LIVE / PRIME",
     featuredTitle: "Улюблені live-столи, VIP-сцени та швидке повернення.",
     featuredBody: "Тут зібрані улюблені live-столи, ведучі та швидке повернення без зайвого пошуку.",
+    image: "/slotcity/assets/hero-card-live.webp",
+    imageAlt: "Quick return",
+    pillLabel: "Quick return",
     tables: [
       { id: "mega-wheel", title: "Mega Wheel", meta: "Trending / UA", accent: "gold" },
       { id: "vip-blackjack", title: "VIP Blackjack", meta: "High value / VIP", accent: "blue" },

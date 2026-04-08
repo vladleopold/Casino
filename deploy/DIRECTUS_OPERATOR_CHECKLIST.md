@@ -6,7 +6,13 @@ Use this for the content or merchandising team during launch week.
 
 At the moment the storefront reads route content from:
 
+- `storefront_imported_pages`
+- `storefront_imported_breadcrumbs`
+- `storefront_banners`
+- `storefront_sections`
+- `storefront_section_items`
 - `storefront_route_payloads`
+- `storefront_pages`
 
 Expected items:
 
@@ -14,11 +20,17 @@ Expected items:
 - `slug = catalog`
 - `slug = live`
 
+Expected banner routes:
+
+- `route = home`
+- `route = catalog`
+- `route = live`
+
 The frontend contract is strict:
 
 - keep each item in the correct slug
-- keep `payload` as valid JSON
-- do not rename top-level keys inside `payload`
+- keep `route`, `section_key`, and `item_type` in the correct bucket
+- keep banner records in the correct `route` and `kind`
 
 Reference files:
 
@@ -34,15 +46,16 @@ These changes are safe in launch week if done carefully:
 - change provider labels
 - change promo titles and kicker text
 - change button target links
-- reorder cards inside arrays
+- reorder cards with `position`
 - swap a game or promo item for another item with the same object shape
 - update FAQ text
 - update footer link labels and href values
 - update contact values
+- update mirrored page `title`, `heading`, `description`, `hero_image_url`, and `content_html`
+- update mirrored page breadcrumbs
 
 Examples of safe arrays:
 
-- `heroPromos`
 - `topSlots`
 - `bonusGames`
 - `liveGames`
@@ -50,6 +63,34 @@ Examples of safe arrays:
 - `quickPicks`
 - `faqItems`
 - `footerGroups`
+
+Safe banner edits in `storefront_banners`:
+
+- change `title`, `kicker`, `body`
+- change CTA labels and href values
+- reorder using `position`
+- replace uploaded image in `image`
+- keep `image_url` only as fallback
+
+Safe section edits in `storefront_sections`:
+
+- bonus bar copy and CTA labels
+- app / social / legal card copy
+- SEO block titles, body text, notes
+- footer brand and footer meta fields
+- `catalog/live` hero copy, image, badge, search text, and console labels
+
+Safe item edits in `storefront_section_items`:
+
+- game card titles, providers, ranks, and images
+- mobile info links
+- social links
+- FAQ rows
+- store buttons
+- footer group links
+- provider pills and footer signals
+- `catalog/live` hero CTA buttons and chips
+- `catalog/live` console cards and quick-return rows
 
 ## Safe-with-care edits
 
@@ -62,6 +103,8 @@ These are allowed, but only if the asset or URL is real and already available:
 
 Rules:
 
+- prefer uploading banner images into `storefront_banners.image`
+- use `image_url` only when engineering intentionally keeps a static asset path
 - image URLs must point to a valid public asset
 - do not paste temporary URLs
 - prefer existing `/slotcity/...` assets unless engineering explicitly moved the asset to Directus `/assets/...`
@@ -70,7 +113,8 @@ Rules:
 ## Do not change without developer approval
 
 - `slug`
-- top-level payload keys
+- `section_key`
+- `item_type`
 - object field names such as `title`, `provider`, `image`, `href`, `rank`
 - collection schema in Directus
 - item permissions or roles
@@ -82,22 +126,26 @@ Rules:
 ## Do not do at all in launch week
 
 - delete the `home`, `catalog`, or `live` item
-- replace `payload` with partial JSON
-- rename arrays
+- move records to another `route` or `section_key` blindly
 - remove required object fields
 - switch image paths blindly
 - introduce new event names in frontend copy or tracking docs without product approval
 
 ## Editing workflow
 
-1. Open the correct item in `storefront_route_payloads`.
-2. Confirm the `slug` before editing.
-3. Copy the current `payload` to a local backup note.
-4. Make one logical change at a time.
-5. Save the item.
-6. Publish the item if your workflow uses status.
-7. Open the affected page in Google Chrome.
-8. Compare to the control screenshot and verify no layout break.
+1. If the change is on a mirrored SlotCity page or top-500 game page: open `storefront_imported_pages`.
+2. If you need breadcrumb labels or order on a mirrored page: open `storefront_imported_breadcrumbs`.
+3. If the change is a banner, slider, or banner image: open `storefront_banners`.
+4. If the change is a singleton text block or CTA section: open `storefront_sections`.
+5. If the change is cards, FAQ, links, tiles, pills, or other repeatable content: open `storefront_section_items`.
+6. Use `storefront_route_payloads` only as a fallback source when engineering explicitly asks for JSON editing.
+7. Confirm `route`, `section_key`, or `slug` before editing.
+8. Copy the current value to a local backup note.
+9. Make one logical change at a time.
+10. Save the item.
+11. Publish the item if your workflow uses status.
+12. Open the affected page in Google Chrome.
+13. Compare to the control screenshot and verify no layout break.
 
 Control screenshots:
 
@@ -111,7 +159,12 @@ Control screenshots:
 
 Safe zones:
 
-- top promo cards
+- promo strip cards
+- hero slider cards
+- promo slider cards
+- banner images
+- `storefront_sections` entries
+- `storefront_section_items` shelves and lists
 - top slots shelf
 - live shelf
 - bonus shelf
@@ -130,6 +183,10 @@ High-risk zones:
 Safe zones:
 
 - promo cards
+- feature banner
+- partner banner
+- `storefront_sections` hero and console records
+- `storefront_section_items` shelves and provider pills
 - top slots
 - discovery games
 - bonus games
@@ -146,6 +203,10 @@ High-risk zones:
 Safe zones:
 
 - live shelves
+- feature banner
+- partner banner
+- `storefront_sections` hero and console records
+- `storefront_section_items` tables and footer signals
 - return shelf
 - cross-sell blocks
 - quick return items
@@ -186,7 +247,7 @@ Verify:
 - a page renders empty after publish
 - a button route is unknown
 - you need a new field, a new section, or a new schema key
-- you need geo-specific logic not already represented in the payload
+- you need geo-specific logic not already represented in the model
 
 ## Fast rollback
 

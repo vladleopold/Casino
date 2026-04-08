@@ -146,8 +146,98 @@ const sharedHeroSliderSlides = [
   }
 ];
 
+const sharedPromotionSliderSlides = [
+  {
+    id: "welcome-pack",
+    kicker: "ВІТАЛЬНИЙ ПАКЕТ",
+    title: "500 000 ₴ + 700 ФС",
+    body: "Розпочни гру з максимальним бонусом на перші сім депозитів.",
+    image: "/slotcity/assets/promos/welcome_pack.png",
+    href: "/promotions/welcome-pack",
+    color: "#FFD15A",
+    ctaLabel: "Детальніше"
+  },
+  {
+    id: "bonus-machine",
+    kicker: "БОНУСНА МАШИНА",
+    title: "ГРОШІ ТА ФРІСПІНИ",
+    body: "Робіть депозити та забирайте гарантовані призи кожні 7 поповнень.",
+    image: "/slotcity/assets/promos/bonus_machine.png",
+    href: "/promotions",
+    color: "#4ADE80",
+    ctaLabel: "Детальніше"
+  },
+  {
+    id: "wheel-of-fortune",
+    kicker: "КОЛЕСО ФОРТУНИ",
+    title: "БЕЗДЕП З ДЖЕКПОТОМ",
+    body: "Крути колесо та вигравай реальні кошти або джекпот без вейджера.",
+    image: "/slotcity/assets/promos/wheel_of_fortune.png",
+    href: "/promotions",
+    color: "#60A5FA",
+    ctaLabel: "Детальніше"
+  },
+  {
+    id: "city-vip",
+    kicker: "CITY VIP",
+    title: "ЕКСКЛЮЗИВНИЙ СЕРВІС",
+    body: "Отримуй вищі кешбеки, персональні бонуси та пріоритетні виплати.",
+    image: "/slotcity/assets/promos/city_vip.png",
+    href: "/vip",
+    color: "#C084FC",
+    ctaLabel: "Детальніше"
+  }
+];
+
 export const mockCatalogRouteContent: CatalogRouteContent = {
   heroPromos: sharedHeroPromos,
+  featureBanner: {
+    kicker: "Знову тут",
+    title: "У столиці розваг",
+    body:
+      "Discovery layer тепер виглядає як справжня витрина SlotCity: живі банери, щільні ряди та швидкий перехід у слот без технічної порожнечі.",
+    image: "/slotcity/assets/tournaments/lucky-season-promo-desktop.webp",
+    href: "/promotions",
+    ctaLabel: "Деталі",
+    tags: ["GO", "Roulette", "Live", "Top"]
+  },
+  partnerBanner: {
+    kicker: "Партнери",
+    title: "Партнерські банери, промо-тижні та добірки ігор.",
+    body:
+      "Тут збираються банери провайдерів, сезонні промо та тематичні добірки, щоб швидше знаходити знайомі ігри та новинки.",
+    image: "/slotcity/assets/tournaments/spinjoy-spring-desktop.webp",
+    href: "/tournaments",
+    ctaLabel: "Промо-тижні",
+    ctaCaption: "Деталі"
+  },
+  gameHallHeader: {
+    title: "Ігровий зал",
+    ctaLabel: "Усі",
+    ctaHref: "/slots"
+  },
+  discoveryHeader: {
+    title: "У столиці розваг",
+    ctaLabel: "Деталі",
+    ctaHref: "/promotions",
+    body:
+      "Онлайн казино SlotCity це популярні слоти, live-ігри, бонусні добірки та знайомі банери без довгого пошуку."
+  },
+  liveHeader: {
+    title: "Live casino",
+    ctaLabel: "Усі",
+    ctaHref: "/live"
+  },
+  bonusHeader: {
+    title: "Ігри для відіграшу бонусів",
+    ctaLabel: "Усі",
+    ctaHref: "/bonuses"
+  },
+  monthlyTopHeader: {
+    title: "ТОП 10 місяця",
+    ctaLabel: "Усі",
+    ctaHref: "/slots"
+  },
   topSlots: [
     {
       id: "gates-of-olympus",
@@ -387,6 +477,12 @@ export const mockCatalogRouteContent: CatalogRouteContent = {
       image: "/slotcity/games/gorilla-mayhem.webp"
     }
   ],
+  sideRailItems: [
+    { id: "bonus", label: "Бонуси", short: "B", href: "/bonuses" },
+    { id: "top", label: "ТОП", short: "T", href: "/catalog" },
+    { id: "live", label: "Live", short: "L", href: "/live" },
+    { id: "apps", label: "App", short: "A", href: "/registration" }
+  ],
   providerHighlights: [
     "Pragmatic Play",
     "Evolution",
@@ -408,6 +504,46 @@ export const mockCatalogRouteContent: CatalogRouteContent = {
 
 export const mockLiveRouteContent: LiveRouteContent = {
   heroPromos: sharedHeroPromos,
+  featureBanner: {
+    kicker: "Повернення",
+    title: "Швидке повернення у live casino",
+    body:
+      "Останній стіл, VIP-зали та популярні live-шоу знаходяться поруч, щоб не шукати їх заново після кожного повернення у гру.",
+    image: "/slotcity/assets/tournaments/lucky-season-promo-desktop.webp",
+    href: "/live",
+    ctaLabel: "Деталі",
+    tags: ["VIP", "Roulette", "Wheel", "Live"]
+  },
+  partnerBanner: {
+    kicker: "VIP / live",
+    title: "Преміальні столи, VIP-зони та live-шоу.",
+    body:
+      "Для гравців, які люблять live casino, тут зібрані VIP-столи, швидке повернення до останніх сесій і окремі зали з популярними ведучими.",
+    image: "/slotcity/assets/promos/city-vip-slider.webp",
+    href: "/vip",
+    ctaLabel: "VIP",
+    ctaCaption: "Деталі"
+  },
+  mainLobbyHeader: {
+    title: "Live casino",
+    ctaLabel: "Усі",
+    ctaHref: "/live"
+  },
+  comebackHeader: {
+    title: "Швидке повернення",
+    ctaLabel: "Деталі",
+    ctaHref: "/vip"
+  },
+  primeTablesHeader: {
+    title: "VIP та преміум столи",
+    ctaLabel: "Усі",
+    ctaHref: "/vip"
+  },
+  crossSellHeader: {
+    title: "Популярні слоти поруч з live",
+    ctaLabel: "Усі",
+    ctaHref: "/slots"
+  },
   liveGames: sharedLiveGames,
   primeTables: [
     sharedLiveGames[0],
@@ -463,6 +599,12 @@ export const mockLiveRouteContent: LiveRouteContent = {
       image: "/slotcity/games/lucky-crusher.webp"
     }
   ],
+  sideRailItems: [
+    { id: "lobby", label: "Lobby", short: "L", href: "/live" },
+    { id: "vip", label: "VIP", short: "V", href: "/vip" },
+    { id: "tables", label: "Tables", short: "T", href: "/live" },
+    { id: "app", label: "App", short: "A", href: "/registration" }
+  ],
   providerHighlights: [
     "Pragmatic Play Live",
     "Evolution",
@@ -483,6 +625,151 @@ export const mockLiveRouteContent: LiveRouteContent = {
 
 export const mockHomeRouteContent: HomeRouteContent = {
   heroSliderSlides: sharedHeroSliderSlides,
+  promotionSliderSlides: sharedPromotionSliderSlides,
+  bonusBar: {
+    kicker: "Вітальний бонус",
+    title: "500 000 ₴ + 700 ФС",
+    body: "Швидкий старт для нових гравців SlotCity.",
+    primaryLabel: "Отримати",
+    primaryHref: "/registration",
+    secondaryLabel: "Деталі",
+    secondaryHref: "/promotions/welcome-pack"
+  },
+  middleBanner: {
+    kicker: "Знову тут",
+    title: "У столиці розваг",
+    body: "Слоти, live та бонусні добірки без довгого пошуку.",
+    image: "/slotcity/assets/tournaments/lucky-season-promo-desktop.webp",
+    href: "/promotions/lucky-season",
+    ctaLabel: "Деталі",
+    tags: ["GO", "Roulette", "Live", "Top"]
+  },
+  partnerBanner: {
+    kicker: "abeplay",
+    title: "Партнерські банери та промо-тижні.",
+    body: "Сезонні банери та швидкий перехід до добірок ігор.",
+    image: "/slotcity/assets/tournaments/spinjoy-spring-desktop.webp",
+    href: "/tournaments",
+    ctaLabel: "Промо-тижні",
+    ctaCaption: "Деталі"
+  },
+  topSlotsHeader: {
+    title: "ТОП слоти",
+    ctaLabel: "Усі",
+    ctaHref: "/slots"
+  },
+  liveHeader: {
+    title: "Live casino",
+    ctaLabel: "Усі",
+    ctaHref: "/live"
+  },
+  bonusGamesHeader: {
+    title: "Ігри для відіграшу бонусів",
+    ctaLabel: "Усі",
+    ctaHref: "/bonuses"
+  },
+  monthlyTopHeader: {
+    title: "ТОП 10 місяця",
+    ctaLabel: "Усі",
+    ctaHref: "/slots"
+  },
+  promotionsHeader: {
+    title: "Акції",
+    ctaLabel: "Усі",
+    ctaHref: "/promotions"
+  },
+  monthlyFeaturedCard: {
+    badge: "ГРА МІСЯЦЯ",
+    body: "Випробуй удачу у найпопулярнішому слоті цього місяця!",
+    ctaLabel: "ГРАТИ ЗАРАЗ",
+    href: "/catalog"
+  },
+  appCard: {
+    kicker: "Застосунок",
+    title: "Завантаж додаток Slot City й отримай 25 ФС.",
+    body: "Інсталюй застосунок та забери 25 ФС для старту.",
+    meta: ["APK 77 МБ", "App Store 160,2 МБ", "Google Play / App Store"],
+    actionLabel: "Деталі",
+    actionHref: "/registration"
+  },
+  socialCard: {
+    kicker: "Соцмережі",
+    title: "Хочеш знати новини першим? Підписуйся!",
+    body: "Новини, турніри та бонусні пропозиції SlotCity в одному потоці."
+  },
+  legalCard: {
+    kicker: "Відповідальна гра",
+    title: "Відповідальна гра та помітний legal-блок.",
+    body:
+      "Якщо гра перестає бути розвагою, зверніться до підтримки або по кваліфіковану допомогу.",
+    meta: ["Самообмеження від 6 місяців", "Support 24/7", "Рішення № 137-Р, 29.10.2025"]
+  },
+  mobileInfoHub: {
+    kicker: "Швидко",
+    title: "Потрібні бонуси, правила чи застосунок?",
+    body: "На мобільному нижні інформаційні секції згорнуті, щоб не перевантажувати стрічку.",
+    links: [
+      {
+        id: "bonuses",
+        title: "Бонуси",
+        body: "Відкрити стартові та сезонні офери",
+        href: "/bonuses"
+      },
+      {
+        id: "app",
+        title: "Застосунок",
+        body: "Подивитися встановлення та стартовий шлях",
+        href: "/registration"
+      },
+      {
+        id: "promotions",
+        title: "Акції",
+        body: "Швидкий перехід до турнірів і промо",
+        href: "/promotions"
+      }
+    ]
+  },
+  seoLead: {
+    kicker: "Слот Сіті казино України",
+    title: "Онлайн казино SlotCity це понад 7000 ігрових автоматів."
+  },
+  bonusSeoCard: {
+    kicker: "Вітальний пакет",
+    title: "Вітальний пакет 500 000 ₴ + 700 ФС.",
+    body:
+      "Вітальний пакет 500 000 ₴ + 700 ФС це потужний старт для новачків, які щойно зареєструвалися на офіційному сайті Slot City.",
+    paragraphs: [
+      "Активація бонусного пакета передбачає здійснення семи поповнень рахунку. Кожен депозит це можливість обрати один з трьох найкращих привілеїв."
+    ],
+    note: "Усі бонуси повинні бути відіграні з вейджером х35."
+  },
+  appSeoCard: {
+    kicker: "Мобільний застосунок",
+    title: "Додаток Slot City для iOS та Android.",
+    body:
+      "За інсталяцію додатка SlotCity гравцям нараховується 25 ФС для слота Magic Apple 2 від 3 Oaks Gaming."
+  },
+  responsibleSeoCard: {
+    kicker: "Відповідальна гра",
+    title: "Відповідальна гра має бути видимою прямо на головній.",
+    body:
+      "Інструменти самообмеження, контакти підтримки та базові правила відповідальної гри мають бути доступні без додаткового пошуку."
+  },
+  footerBrand: {
+    title: "Slot City Casino",
+    body:
+      "Онлайн казино SlotCity це понад 7000 ігрових автоматів, live-казино, бонуси, турніри та ліцензований формат гри для України."
+  },
+  footerMeta: {
+    email: "support@slotcity.ua",
+    phone: "+380630213021",
+    address: "пров. Ярославський, буд. 1/3, м. Київ, 04071, Україна",
+    locale: "Ukraine",
+    hours: "Monday through Sunday, all day",
+    age: "21+",
+    bottomEmail: "support@slotcity.ua",
+    bottomNote: "Slot City (Слот Сіті) • ліцензоване онлайн казино України"
+  },
   topSlots: [
     ...mockCatalogRouteContent.topSlots,
     {
@@ -754,10 +1041,16 @@ export const mockHomeRouteContent: HomeRouteContent = {
     }
   ],
   sideRailItems: [
-    { id: "bonus", label: "Бонуси", short: "+" },
-    { id: "top", label: "ТОП", short: "T" },
-    { id: "live", label: "Live", short: "L" },
-    { id: "promo", label: "Акції", short: "%" }
+    { id: "bonus", label: "Бонуси", short: "+", href: "/bonuses" },
+    { id: "top", label: "ТОП", short: "T", href: "/#home-top-slots" },
+    { id: "live", label: "Live", short: "L", href: "/live" },
+    { id: "promo", label: "Акції", short: "%", href: "/promotions" }
+  ],
+  mobileDockItems: [
+    { id: "games", label: "Ігри", href: "/catalog", icon: "games" },
+    { id: "live", label: "Live", href: "/live", icon: "live" },
+    { id: "bonuses", label: "Бонуси", href: "/bonuses", icon: "bonuses" },
+    { id: "search", label: "Пошук", href: "/catalog#catalog-search", icon: "search" }
   ],
   socialLinks: [
     {

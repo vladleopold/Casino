@@ -7,8 +7,10 @@
     "dev": "directus start",
     "start": "directus start",
     "bootstrap": "directus bootstrap",
+    "bootstrap:storefront": "tsx ./scripts/bootstrap-storefront-cms.ts",
     "seed:route-payloads": "tsx ./scripts/export-route-payloads.ts",
     "seed:push-route-payloads": "tsx ./scripts/push-route-payloads.ts",
+    "seed:slotcity-pages": "tsx ./scripts/import-slotcity-pages.ts",
     "snapshot": "directus schema snapshot ./schema.yml",
     "typecheck": "node -e \"process.exit(0)\"",
     "lint": "node -e \"process.exit(0)\""

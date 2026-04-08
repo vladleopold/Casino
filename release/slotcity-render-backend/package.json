@@ -6,7 +6,12 @@
     "node": ">=22.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["argon2", "esbuild", "isolated-vm", "sharp"]
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild",
+      "isolated-vm",
+      "sharp"
+    ]
   },
   "scripts": {
     "dev": "turbo dev --parallel",

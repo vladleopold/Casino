@@ -10,6 +10,7 @@
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@slotcity/types": "workspace:*"
+    "@slotcity/types": "workspace:*",
+    "cheerio": "^1.2.0"
   }
 }

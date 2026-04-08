@@ -13,21 +13,21 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, route = "home" }: HeaderProps) {
   const searchParams = useSearchParams();
-  const isLoggedIn = searchParams.get("auth") !== "guest";
+  const isLoggedIn = searchParams.get("auth") === "member";
   const navItems: Array<{ label: string; href: string; match: string[] }> = [
-    { label: "Casino", href: "/casino", match: ["home", "casino"] },
-    { label: "Slots", href: "/slots", match: ["catalog", "slots"] },
+    { label: "Головна", href: "/", match: ["home", "casino"] },
+    { label: "Каталог", href: "/catalog", match: ["catalog", "slots"] },
     { label: "Live", href: "/live", match: ["live"] },
-    { label: "Bonuses", href: "/bonuses", match: ["promotions", "bonuses", "registration"] },
+    { label: "Бонуси", href: "/bonuses", match: ["promotions", "bonuses", "registration"] },
     { label: "VIP", href: "/vip", match: ["vip", "tournaments"] }
   ];
 
   return (
     <header className="slotcity-header">
       <div className="slotcity-header-left">
-        <button 
-          type="button" 
-          className="slotcity-mobile-dock-menu-btn header-menu-desktop" 
+        <button
+          type="button"
+          className="slotcity-mobile-dock-menu-btn slotcity-desktop-menu"
           aria-label="Menu"
           onClick={onMenuClick}
           style={{ marginTop: 0, flex: "none" }}
@@ -38,10 +38,17 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
             <span />
           </div>
         </button>
+        <button type="button" className="slotcity-header-random" aria-label="Випадкова гра">
+          <span className="slotcity-header-random-icon">?</span>
+          <span className="slotcity-header-random-label">Випадкова</span>
+        </button>
       </div>
 
       <Link href="/" className="slotcity-logo-link" aria-label="SlotCity home">
-        <img src="/slotcity/brand/logo.svg" alt="SlotCity" className="slotcity-logo" />
+        <picture>
+          <source media="(max-width: 640px)" srcSet="/slotcity/brand/logo-mini.svg" />
+          <img src="/slotcity/brand/logo.svg" alt="SlotCity" className="slotcity-logo" />
+        </picture>
       </Link>
 
       <nav className="slotcity-header-nav" aria-label="Основні розділи">
@@ -65,16 +72,6 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
       </nav>
 
       <div className="slotcity-header-right">
-        <button
-          type="button"
-          className="slotcity-header-inspector"
-          data-inspector-ignore="true"
-          onClick={() => window.dispatchEvent(new Event("toggle-dom-inspector"))}
-          aria-label="Увімкнути піпетку"
-        >
-          <span className="slotcity-header-inspector-dot" />
-          <span>Піпетка</span>
-        </button>
         {isLoggedIn ? (
           <>
             <button type="button" className="slotcity-header-notification" aria-label="Notifications">
@@ -99,7 +96,8 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
                 }
               }}
             >
-              Поповнити
+              <span className="slotcity-deposit-button-label">Поповнити</span>
+              <span className="slotcity-deposit-button-short" aria-hidden="true">+</span>
             </TrackedButton>
           </>
         ) : (
@@ -112,7 +110,7 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
                 properties: { route, placement: "header_guest_login" }
               }}
             >
-              Увійти
+              <span className="slotcity-guest-login-label">Увійти</span>
             </TrackedLink>
             <TrackedLink
               href={"/registration" as Route}
@@ -122,7 +120,8 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
                 properties: { route, placement: "header_guest_register" }
               }}
             >
-              Реєстрація
+              <span className="slotcity-guest-register-label">Реєстрація</span>
+              <span className="slotcity-guest-register-short" aria-hidden="true">+</span>
             </TrackedLink>
           </div>
         )}

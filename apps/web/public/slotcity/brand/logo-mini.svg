@@ -1,7 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
-  <style>
-    .text { font: bold 120px Arial, sans-serif; fill: #FFD700; }
-  </style>
-  <rect width="100%" height="100%" fill="none"/>
-  <text x="50%" y="60%" text-anchor="middle" class="text">SlotSpot</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="140" viewBox="0 0 420 140" role="img" aria-labelledby="slotcityLogoMiniTitle">
+  <title id="slotcityLogoMiniTitle">SlotCity</title>
+  <defs>
+    <linearGradient id="slotcity-mini-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3B8" />
+      <stop offset="38%" stop-color="#FFD85B" />
+      <stop offset="100%" stop-color="#C27412" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M28 18h364c14 0 26 12 26 26v18c0 14-12 26-26 26h-44l-18 24H90L72 88H28C14 88 2 76 2 62V44c0-14 12-26 26-26Z"
+    fill="#6A3408"
+    stroke="#D79B2C"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+  <text
+    x="210"
+    y="73"
+    text-anchor="middle"
+    fill="url(#slotcity-mini-gold)"
+    stroke="#4D2200"
+    stroke-width="7"
+    paint-order="stroke fill"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="58"
+    font-style="italic"
+    font-weight="700"
+    letter-spacing="-2"
+  >
+    SlotCity
+  </text>
 </svg>

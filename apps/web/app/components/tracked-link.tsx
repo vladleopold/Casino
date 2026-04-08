@@ -37,15 +37,16 @@ export function TrackedLink({
 }: TrackedLinkProps) {
   const { capture } = useSlotcityAnalytics();
   const resolvedAriaLabel = ariaLabelProp ?? ariaLabel;
+  const resolvedHref = typeof href === "string" && href.length > 0 ? href : "/";
 
   const handleClick = () => {
     void capture(event, payload);
   };
 
-  if (isExternalHref(href) || target === "_blank") {
+  if (isExternalHref(resolvedHref) || target === "_blank") {
     return (
       <a
-        href={href}
+        href={resolvedHref}
         className={className}
         target={target}
         rel={rel}
@@ -59,7 +60,7 @@ export function TrackedLink({
 
   return (
     <Link
-      href={href as Route}
+      href={resolvedHref as Route}
       className={className}
       aria-label={resolvedAriaLabel}
       onClick={handleClick}

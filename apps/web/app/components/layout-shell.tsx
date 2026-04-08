@@ -21,6 +21,14 @@ export function LayoutShell({
     return () => window.removeEventListener("open-sidebar", handleOpenMenu);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = isSidebarOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSidebarOpen]);
+
   return (
     <>
       <Suspense fallback={null}>

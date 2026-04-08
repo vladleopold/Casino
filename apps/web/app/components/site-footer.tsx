@@ -1,57 +1,28 @@
-"use client";
-
-import type { Route } from "next";
+import { getHomeRouteContent } from "@slotcity/cms-sdk";
 
 import { TrackedLink } from "./tracked-link";
 
-const footerGroups = [
-  {
-    title: "Казино",
-    links: [
-      { label: "Головна", href: "/" },
-      { label: "Слоти", href: "/slots" },
-      { label: "Live casino", href: "/live" }
-    ]
-  },
-  {
-    title: "Пропозиції",
-    links: [
-      { label: "Бонуси", href: "/bonuses" },
-      { label: "CITY VIP", href: "/vip" },
-      { label: "Турніри", href: "/tournaments" }
-    ]
-  },
-  {
-    title: "Акаунт",
-    links: [
-      { label: "Реєстрація", href: "/registration" },
-      { label: "Увійти", href: "/registration?mode=login" },
-      { label: "Промо-сторінки", href: "/promotions" }
-    ]
-  }
-] as const;
+export async function SiteFooter({ route = "home" }: { route?: string }) {
+  const { footerBrand, footerGroups, footerMeta } = await getHomeRouteContent();
 
-export function SiteFooter({ route = "home" }: { route?: string }) {
   return (
     <>
       <section className="slotcity-shared-footer">
         <div className="slotcity-shared-footer-lead">
           <span className="slotcity-section-kicker">SlotCity</span>
-          <h2>Слоти, live, бонуси та VIP в єдиній навігаційній системі.</h2>
-          <p>
-            Єдиний футерний блок зводить головні маршрути, бонусні сценарії та вхід до акаунта в один помітний контур.
-          </p>
+          <h2>{footerBrand.title}</h2>
+          <p>{footerBrand.body}</p>
         </div>
 
         <div className="slotcity-shared-footer-groups">
           {footerGroups.map((group) => (
-            <section key={group.title} className="slotcity-shared-footer-group">
+            <section key={group.id} className="slotcity-shared-footer-group">
               <strong>{group.title}</strong>
               <div className="slotcity-shared-footer-links">
                 {group.links.map((link) => (
                   <TrackedLink
-                    key={link.href}
-                    href={link.href as Route}
+                    key={link.id}
+                    href={link.href}
                     className="slotcity-shared-footer-link"
                     event="cta_clicked"
                     payload={{
@@ -72,9 +43,11 @@ export function SiteFooter({ route = "home" }: { route?: string }) {
       </section>
 
       <div className="slotcity-shared-footer-meta">
-        <span>support@slotcity.ua</span>
-        <span>+380630213021</span>
-        <span>21+</span>
+        <a href={`mailto:${footerMeta.email}`}>{footerMeta.email}</a>
+        <a href={`tel:${footerMeta.phone}`}>{footerMeta.phone}</a>
+        <span>{footerMeta.locale}</span>
+        <span>{footerMeta.hours}</span>
+        <span>{footerMeta.age}</span>
       </div>
     </>
   );
