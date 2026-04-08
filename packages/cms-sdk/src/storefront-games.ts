@@ -27,6 +27,16 @@ type NextFetchInit = RequestInit & {
   };
 };
 
+function getTimeoutSignal(timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cancel: () => clearTimeout(timeoutId)
+  };
+}
+
 type DirectusImageRef = string | { id?: string } | null | undefined;
 
 interface DirectusStorefrontGameRecord {
@@ -63,9 +73,26 @@ interface DirectusStorefrontGameRecord {
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL?.replace(/\/$/, "");
 const CONTENT_MODE = process.env.STOREFRONT_CONTENT_MODE ?? "mock";
+const DIRECTUS_FETCH_TIMEOUT_MS = Number.parseInt(
+  process.env.DIRECTUS_FETCH_TIMEOUT_MS ?? "6000",
+  10
+);
 const FALLBACK_DEMO_SOURCE_LABEL = "Демо на SlotCity";
 
 let gamePoolPromise: Promise<Map<string, GameTileContent>> | null = null;
+
+async function fetchDirectus(input: string, init: NextFetchInit) {
+  const { signal, cancel } = getTimeoutSignal(DIRECTUS_FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal
+    });
+  } finally {
+    cancel();
+  }
+}
 
 function getImageId(image: DirectusImageRef) {
   if (typeof image === "string" && image.length > 0) {
@@ -246,7 +273,7 @@ async function fetchDirectusGame(slug: string): Promise<DirectusStorefrontGameRe
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_games?filter[slug][_eq]=${encodeURIComponent(
         slug
       )}&filter[status][_eq]=published&fields=*`,

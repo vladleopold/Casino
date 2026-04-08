@@ -60,6 +60,10 @@ declare const process: {
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL?.replace(/\/$/, "");
 const CONTENT_MODE = process.env.STOREFRONT_CONTENT_MODE ?? "mock";
+const DIRECTUS_FETCH_TIMEOUT_MS = Number.parseInt(
+  process.env.DIRECTUS_FETCH_TIMEOUT_MS ?? "6000",
+  10
+);
 
 type StorefrontRoute = "home" | "catalog" | "live";
 
@@ -155,6 +159,29 @@ type NextFetchInit = RequestInit & {
     revalidate: number;
   };
 };
+
+function getTimeoutSignal(timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cancel: () => clearTimeout(timeoutId)
+  };
+}
+
+async function fetchDirectus(input: string, init: NextFetchInit) {
+  const { signal, cancel } = getTimeoutSignal(DIRECTUS_FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal
+    });
+  } finally {
+    cancel();
+  }
+}
 
 function getImageId(image: DirectusImageRef) {
   if (typeof image === "string" && image.length > 0) {
@@ -803,7 +830,7 @@ async function fetchDirectusBanners(route: StorefrontRoute): Promise<DirectusBan
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_banners?filter[route][_eq]=${route}&filter[status][_eq]=published&sort=position&fields=*`,
       {
         next: {
@@ -834,7 +861,7 @@ async function fetchDirectusSections(
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_sections?filter[route][_eq]=${route}&filter[status][_eq]=published&sort=position,slug&fields=*`,
       {
         next: {
@@ -865,7 +892,7 @@ async function fetchDirectusSectionItems(
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_section_items?filter[route][_eq]=${route}&filter[status][_eq]=published&sort=section_key,position,slug&fields=*`,
       {
         next: {
@@ -1425,7 +1452,7 @@ async function fetchDirectusPage<T>(
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_pages?filter[slug][_eq]=${slug}&fields=*.*.*`,
       {
         next: {
@@ -1479,7 +1506,7 @@ async function fetchDirectusRoutePayload<T>(
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchDirectus(
       `${DIRECTUS_URL}/items/storefront_route_payloads?filter[slug][_eq]=${slug}&fields=payload`,
       {
         next: {
