@@ -3,4 +3,5 @@ export * from "./directus-blueprint";
 export * from "./imported-pages";
 export * from "./mock-content";
 export * from "./route-content";
+export * from "./storefront-games";
 export * from "./types";

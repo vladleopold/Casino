@@ -12,10 +12,24 @@ type NextFetchInit = RequestInit & {
   };
 };
 
+function getTimeoutSignal(timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cancel: () => clearTimeout(timeoutId)
+  };
+}
+
 const DIRECTUS_URL = process.env.DIRECTUS_URL?.replace(/\/$/, "");
 const SOURCE_SITE_URL = (process.env.SLOTCITY_SOURCE_SITE_URL ?? "https://slotcity.ua").replace(
   /\/$/,
   ""
+);
+const REMOTE_FETCH_TIMEOUT_MS = Number.parseInt(
+  process.env.REMOTE_FETCH_TIMEOUT_MS ?? "8000",
+  10
 );
 const POPULAR_GAMES_LIMIT = Number.parseInt(
   process.env.SLOTCITY_POPULAR_GAMES_LIMIT ?? "500",
@@ -47,6 +61,19 @@ interface DirectusImportedBreadcrumbRecord {
 }
 
 let popularGamePathsPromise: Promise<Set<string>> | null = null;
+
+async function fetchRemote(input: string, init: NextFetchInit) {
+  const { signal, cancel } = getTimeoutSignal(REMOTE_FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal
+    });
+  } finally {
+    cancel();
+  }
+}
 
 function normalizeSitePath(input: string) {
   const url = input.startsWith("http")
@@ -223,7 +250,7 @@ function inferPageType(path: string): ImportedPagePayload["pageType"] {
 
 async function fetchText(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url, {
+    const response = await fetchRemote(url, {
       next: {
         revalidate: 300
       }
@@ -421,7 +448,7 @@ async function fetchDirectusImportedPage(path: string): Promise<ImportedPagePayl
 
   try {
     const [pageResponse, breadcrumbsResponse] = await Promise.all([
-      fetch(
+      fetchRemote(
         `${DIRECTUS_URL}/items/storefront_imported_pages?filter[slug][_eq]=${encodeURIComponent(
           path
         )}&fields=*`,
@@ -431,7 +458,7 @@ async function fetchDirectusImportedPage(path: string): Promise<ImportedPagePayl
           }
         } as NextFetchInit
       ),
-      fetch(
+      fetchRemote(
         `${DIRECTUS_URL}/items/storefront_imported_breadcrumbs?filter[page_slug][_eq]=${encodeURIComponent(
           path
         )}&sort=position&fields=label,href`,
@@ -490,7 +517,7 @@ async function fetchDirectusImportedPage(path: string): Promise<ImportedPagePayl
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchRemote(
       `${DIRECTUS_URL}/items/storefront_route_payloads?filter[slug][_eq]=${encodeURIComponent(
         path
       )}&fields=payload`,
@@ -525,10 +552,13 @@ async function fetchRemoteImportedPage(path: string): Promise<ImportedPagePayloa
   return buildPayload(path, html);
 }
 
-export async function getImportedPagePayload(path: string): Promise<ImportedPagePayload | null> {
+export async function getImportedPagePayload(
+  path: string,
+  options?: { allowUnlistedGame?: boolean }
+): Promise<ImportedPagePayload | null> {
   const normalizedPath = normalizeSitePath(path);
 
-  if (normalizedPath.startsWith("/game/")) {
+  if (normalizedPath.startsWith("/game/") && !options?.allowUnlistedGame) {
     const allowedGames = await getPopularGamePaths();
 
     if (!allowedGames.has(normalizedPath)) {

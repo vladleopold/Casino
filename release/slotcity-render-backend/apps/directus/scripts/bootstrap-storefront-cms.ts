@@ -334,6 +334,24 @@ const storefrontImportedShellRouteChoices = [
   { text: "Tournaments", value: "tournaments" }
 ];
 
+const storefrontGameTypeChoices = [
+  { text: "Slot", value: "slot" },
+  { text: "Live", value: "live" }
+];
+
+const storefrontGameLaunchModeChoices = [
+  { text: "Disabled / placeholder", value: "none" },
+  { text: "Embed via iframe", value: "iframe" },
+  { text: "Open external launcher", value: "external" }
+];
+
+const storefrontGameAccentChoices = [
+  { text: "Gold", value: "gold" },
+  { text: "Green", value: "green" },
+  { text: "Blue", value: "blue" },
+  { text: "Violet", value: "violet" }
+];
+
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const routeSeedPath = resolve(currentDir, "../seed/route-payloads.json");
 const directusUrl = process.env.DIRECTUS_URL?.replace(/\/$/, "");
@@ -528,7 +546,11 @@ function createJsonField(
   collection: string,
   field: string,
   note: string,
-  template = "[]"
+  template = "[]",
+  options?: {
+    group?: string;
+    readonly?: boolean;
+  }
 ): FieldDefinition {
   return {
     field,
@@ -541,7 +563,9 @@ function createJsonField(
         language: "json",
         lineNumber: true,
         template
-      }
+      },
+      group: options?.group ?? null,
+      readonly: options?.readonly ?? false
     },
     schema: {
       name: field,
@@ -571,14 +595,22 @@ function createIntegerField(collection: string, field: string, note: string): Fi
   };
 }
 
-function createBooleanField(collection: string, field: string, note: string): FieldDefinition {
+function createBooleanField(
+  collection: string,
+  field: string,
+  note: string,
+  options?: {
+    group?: string;
+  }
+): FieldDefinition {
   return {
     field,
     type: "boolean",
     meta: {
       interface: "boolean",
       width: "half",
-      note
+      note,
+      group: options?.group ?? null
     },
     schema: {
       name: field,
@@ -876,6 +908,246 @@ const collections: CollectionDefinition[] = [
         width: "full"
       }),
       createStatusField("storefront_imported_breadcrumbs")
+    ]
+  },
+  {
+    collection: "storefront_games",
+    icon: "sports_esports",
+    displayTemplate: "{{slug}} / {{name}}",
+    note: "Directus-managed game detail pages with launch and demo settings",
+    fields: [
+      createGroupField("storefront_games", "route_settings", "Route settings", {
+        icon: "route"
+      }),
+      createSlugField("storefront_games", {
+        width: "full",
+        group: "route_settings"
+      }),
+      createStatusField("storefront_games", {
+        group: "route_settings"
+      }),
+      createStringField("storefront_games", "game_type", "Game type", {
+        required: true,
+        defaultValue: "slot",
+        interface: "select-dropdown",
+        interfaceOptions: {
+          choices: storefrontGameTypeChoices
+        },
+        group: "route_settings"
+      }),
+      createStringField("storefront_games", "provider_name", "Provider / studio name", {
+        width: "full",
+        group: "route_settings"
+      }),
+      createStringField("storefront_games", "provider_slug", "Provider slug or system code", {
+        group: "route_settings"
+      }),
+      createStringField("storefront_games", "provider_game_id", "Provider game reference / id", {
+        width: "full",
+        group: "route_settings"
+      }),
+      createGroupField("storefront_games", "hero_content", "Hero content", {
+        icon: "image"
+      }),
+      createStringField("storefront_games", "name", "Game display name", {
+        width: "full",
+        required: true,
+        group: "hero_content"
+      }),
+      createStringField("storefront_games", "heading", "Visible H1 heading", {
+        width: "full",
+        required: true,
+        group: "hero_content"
+      }),
+      createStringField("storefront_games", "kicker", "Small label above the heading", {
+        width: "full",
+        group: "hero_content"
+      }),
+      createTextField("storefront_games", "description", "Short hero description", {
+        group: "hero_content"
+      }),
+      createStringField("storefront_games", "accent", "Accent token", {
+        defaultValue: "gold",
+        interface: "select-dropdown",
+        interfaceOptions: {
+          choices: storefrontGameAccentChoices
+        },
+        group: "hero_content"
+      }),
+      createFileField("storefront_games", "hero_image", "Uploadable hero artwork", {
+        group: "hero_content"
+      }),
+      createStringField("storefront_games", "hero_image_url", "Fallback hero image URL", {
+        width: "full",
+        group: "hero_content"
+      }),
+      createStringField("storefront_games", "hero_image_alt", "Accessible hero alt text", {
+        width: "full",
+        group: "hero_content"
+      }),
+      createJsonField(
+        "storefront_games",
+        "badges",
+        "Array of short badges",
+        '["TOP","Demo"]',
+        {
+          group: "hero_content"
+        }
+      ),
+      createJsonField(
+        "storefront_games",
+        "highlights",
+        "Array of short benefit rows shown next to the launcher",
+        '["Мобільна версія","Швидкий запуск"]',
+        {
+          group: "hero_content"
+        }
+      ),
+      createJsonField(
+        "storefront_games",
+        "facts",
+        'Array of fact objects like [{"label":"RTP","value":"96.5%"}]',
+        '[{"label":"Provider","value":"Pragmatic Play"}]',
+        {
+          group: "editorial_content"
+        }
+      ),
+      createGroupField("storefront_games", "launch_setup", "Launch & demo", {
+        icon: "play_circle"
+      }),
+      createStringField("storefront_games", "launch_mode", "How to open the game", {
+        required: true,
+        defaultValue: "none",
+        interface: "select-dropdown",
+        interfaceOptions: {
+          choices: storefrontGameLaunchModeChoices
+        },
+        group: "launch_setup"
+      }),
+      createStringField("storefront_games", "launch_url", "Real-money or authenticated launch URL", {
+        width: "full",
+        group: "launch_setup"
+      }),
+      createStringField("storefront_games", "demo_url", "Demo launch URL", {
+        width: "full",
+        group: "launch_setup"
+      }),
+      createStringField("storefront_games", "launch_label", "Primary CTA label", {
+        defaultValue: "Грати",
+        group: "launch_setup"
+      }),
+      createStringField("storefront_games", "demo_label", "Demo CTA label", {
+        defaultValue: "Демо",
+        group: "launch_setup"
+      }),
+      createBooleanField(
+        "storefront_games",
+        "requires_auth",
+        "Whether the real-money launcher should send the user through auth / registration",
+        {
+          group: "launch_setup"
+        }
+      ),
+      createBooleanField(
+        "storefront_games",
+        "open_in_new_tab",
+        "Open launchers in a new tab instead of inside the page",
+        {
+          group: "launch_setup"
+        }
+      ),
+      createGroupField("storefront_games", "editorial_content", "Editorial content", {
+        icon: "article"
+      }),
+      createTextField(
+        "storefront_games",
+        "content_html",
+        "Editable HTML body rendered below the launcher",
+        {
+          interface: "input-rich-text-html",
+          group: "editorial_content"
+        }
+      ),
+      createJsonField(
+        "storefront_games",
+        "related_game_slugs",
+        "Array of related game slugs shown in the related shelf",
+        '["gates-of-olympus","sugar-rush"]',
+        {
+          group: "editorial_content"
+        }
+      ),
+      createGroupField("storefront_games", "seo_source", "SEO & source", {
+        icon: "travel_explore",
+        start: "closed"
+      }),
+      createStringField("storefront_games", "seo_title", "Meta title", {
+        width: "full",
+        group: "seo_source"
+      }),
+      createTextField("storefront_games", "seo_description", "Meta description", {
+        group: "seo_source"
+      }),
+      createStringField("storefront_games", "source_url", "Original source page URL", {
+        width: "full",
+        group: "seo_source",
+        readonly: true
+      }),
+      createStringField("storefront_games", "extracted_at", "Last imported timestamp", {
+        width: "full",
+        group: "seo_source",
+        readonly: true
+      })
+    ]
+  },
+  {
+    collection: "storefront_users",
+    icon: "group",
+    displayTemplate: "{{display_name}} / {{email}}",
+    note: "Admin-visible mirror of storefront auth users stored in PostgreSQL",
+    fields: [
+      createStringField("storefront_users", "auth_user_id", "Storefront auth user id", {
+        required: true,
+        width: "full"
+      }),
+      createStringField("storefront_users", "email", "Primary email address", {
+        required: true,
+        width: "full"
+      }),
+      createStringField("storefront_users", "username", "Username", {
+        required: true
+      }),
+      createStringField("storefront_users", "display_name", "Visible display name", {
+        width: "half"
+      }),
+      createStringField("storefront_users", "auth_provider", "Auth provider", {
+        width: "half"
+      }),
+      createIntegerField("storefront_users", "balance", "Current balance in storefront"),
+      createStringField("storefront_users", "status", "User status", {
+        width: "half"
+      }),
+      createStringField("storefront_users", "avatar_url", "Avatar URL", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "google_subject", "Google subject id", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "email_verified_at", "Email verified timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "created_at", "Created at timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "updated_at", "Updated at timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "last_login_at", "Last login timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "last_seen_at", "Last seen timestamp", {
+        width: "full"
+      })
     ]
   },
   {
@@ -2189,11 +2461,13 @@ await ensureDirectusRelation("storefront_banners", "image", "directus_files");
 await ensureDirectusRelation("storefront_sections", "image", "directus_files");
 await ensureDirectusRelation("storefront_section_items", "image", "directus_files");
 await ensureDirectusRelation("storefront_imported_pages", "hero_image", "directus_files");
+await ensureDirectusRelation("storefront_games", "hero_image", "directus_files");
 
 await ensurePublicReadPermission("storefront_pages");
 await ensurePublicReadPermission("storefront_route_payloads");
 await ensurePublicReadPermission("storefront_imported_pages");
 await ensurePublicReadPermission("storefront_imported_breadcrumbs");
+await ensurePublicReadPermission("storefront_games");
 await ensurePublicReadPermission("storefront_banners");
 await ensurePublicReadPermission("storefront_sections");
 await ensurePublicReadPermission("storefront_section_items");
