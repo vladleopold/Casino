@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import type { StorefrontGameLaunchContent } from "@slotcity/cms-sdk";
 
+import { useSlotcityAccount } from "./account-context";
+import { TrackedButton } from "./tracked-button";
 import { TrackedLink } from "./tracked-link";
 
 interface GameLauncherProps {
@@ -15,16 +17,6 @@ interface GameLauncherProps {
   launch: StorefrontGameLaunchContent;
 }
 
-type LaunchTab = "demo" | "real";
-
-function resolveDefaultTab(launch: StorefrontGameLaunchContent): LaunchTab {
-  if (launch.demoUrl) {
-    return "demo";
-  }
-
-  return "real";
-}
-
 export function GameLauncher({
   slug,
   title,
@@ -32,48 +24,85 @@ export function GameLauncher({
   heroImage,
   launch
 }: GameLauncherProps) {
-  const [activeTab, setActiveTab] = useState<LaunchTab>(() => resolveDefaultTab(launch));
-  const realHref = launch.launchUrl || `/registration?game=${slug}`;
+  const { isAuthenticated, trackGameLaunch } = useSlotcityAccount();
+  const launcherRef = useRef<HTMLElement>(null);
+  const [isDemoLoaded, setIsDemoLoaded] = useState(false);
+  const [hasAutoExpanded, setHasAutoExpanded] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const realHref = isAuthenticated ? launch.launchUrl || `/game/${slug}` : `/registration?game=${slug}`;
   const demoHref = launch.demoUrl;
-  const activeIframeHref =
-    activeTab === "demo" ? demoHref || realHref : realHref || demoHref || `/registration?game=${slug}`;
-  const canEmbed = launch.mode === "iframe" && Boolean(activeIframeHref);
+  const demoEmbedSrc = launch.demoSourceUrl;
+  const canEmbedDemo = Boolean(demoEmbedSrc);
   const externalTarget = launch.openInNewTab || launch.mode === "external" ? "_blank" : undefined;
   const externalRel = externalTarget === "_blank" ? "noreferrer" : undefined;
 
+  useEffect(() => {
+    if (!canEmbedDemo || !isDemoLoaded || hasAutoExpanded || typeof window === "undefined") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsTheaterMode(true);
+      setHasAutoExpanded(true);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [canEmbedDemo, hasAutoExpanded, isDemoLoaded]);
+
+  useEffect(() => {
+    if (!isTheaterMode || typeof document === "undefined") {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isTheaterMode]);
+
+  useEffect(() => {
+    if (!isTheaterMode || typeof window === "undefined") {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsTheaterMode(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isTheaterMode]);
+
   return (
-    <section className="slotcity-game-launcher">
+    <section
+      ref={launcherRef}
+      className={`slotcity-game-launcher${isTheaterMode ? " is-theater" : ""}`}
+    >
+      {isTheaterMode ? (
+        <button
+          type="button"
+          className="slotcity-game-launcher-backdrop"
+          aria-label="Згорнути гру"
+          onClick={() => setIsTheaterMode(false)}
+        />
+      ) : null}
       <div className="slotcity-game-launcher-surface">
-        {canEmbed ? (
-          <>
-            <div className="slotcity-game-launcher-tabs" role="tablist" aria-label="Режим гри">
-              {demoHref ? (
-                <button
-                  type="button"
-                  className={`slotcity-game-launcher-tab${activeTab === "demo" ? " is-active" : ""}`}
-                  onClick={() => setActiveTab("demo")}
-                >
-                  {launch.demoLabel}
-                </button>
-              ) : null}
-              <button
-                type="button"
-                className={`slotcity-game-launcher-tab${activeTab === "real" ? " is-active" : ""}`}
-                onClick={() => setActiveTab("real")}
-              >
-                {launch.launchLabel}
-              </button>
-            </div>
-            <div className="slotcity-game-launcher-embed">
-              <iframe
-                src={activeIframeHref}
-                title={`${title} launcher`}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
-          </>
+        {canEmbedDemo ? (
+          <div className="slotcity-game-launcher-embed">
+            <iframe
+              src={demoEmbedSrc}
+              title={`${title} demo`}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              className="slotcity-game-launcher-embed-frame is-demo"
+              onLoad={() => setIsDemoLoaded(true)}
+            />
+          </div>
         ) : (
           <div className="slotcity-game-launcher-preview">
             {heroImage ? (
@@ -103,6 +132,15 @@ export function GameLauncher({
         <TrackedLink
           href={realHref}
           className="slotcity-cta slotcity-cta-primary"
+          onClick={() => {
+            void trackGameLaunch({
+              slug,
+              provider,
+              mode: "real",
+              targetUrl: realHref,
+              success: isAuthenticated || Boolean(launch.launchUrl)
+            });
+          }}
           event="cta_clicked"
           payload={{
             properties: {
@@ -117,10 +155,37 @@ export function GameLauncher({
         >
           {launch.launchLabel}
         </TrackedLink>
-        {demoHref ? (
+        {canEmbedDemo ? (
+          <TrackedButton
+            className="slotcity-cta slotcity-cta-secondary slotcity-game-launcher-passive"
+            onClick={() => {
+              setIsTheaterMode((current) => !current);
+            }}
+            event="cta_clicked"
+            payload={{
+              properties: {
+                route: "game",
+                placement: "game_launcher_fullscreen",
+                slug,
+                label: isTheaterMode ? "collapse" : "expand"
+              }
+            }}
+          >
+            {isTheaterMode ? "Згорнути" : "На весь екран"}
+          </TrackedButton>
+        ) : demoHref ? (
           <TrackedLink
             href={demoHref}
             className="slotcity-cta slotcity-cta-secondary"
+            onClick={() => {
+              void trackGameLaunch({
+                slug,
+                provider,
+                mode: "demo",
+                targetUrl: demoHref,
+                success: true
+              });
+            }}
             event="cta_clicked"
             payload={{
               properties: {
@@ -130,8 +195,6 @@ export function GameLauncher({
                 label: launch.demoLabel
               }
             }}
-            target={externalTarget ?? "_blank"}
-            rel="noreferrer"
           >
             {launch.demoLabel}
           </TrackedLink>

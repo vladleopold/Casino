@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { TrackedLink } from "./tracked-link";
+import { useSlotcityAccount } from "./account-context";
 
 const quickLinks = [
   { label: "Каталог", href: "/catalog", kicker: "Ігри" },
@@ -30,8 +30,7 @@ const supportLinks = [
 ];
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const searchParams = useSearchParams();
-  const isLoggedIn = searchParams.get("auth") === "member";
+  const { account, isAuthenticated, logout, requestDeposit } = useSlotcityAccount();
 
   return (
     <>
@@ -50,11 +49,17 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           >
             <span>✕</span>
           </button>
-          <img src="/slotcity/brand/logo-mini.svg" alt="SlotCity" className="slotcity-sidebar-logo" />
-          {isLoggedIn ? (
+          <img src="/slotcity/brand/logo.png" alt="SlotCity" className="slotcity-sidebar-logo" />
+          {isAuthenticated ? (
             <div className="slotcity-sidebar-user-id">
-              <span>ID: 5876258</span>
-              <button type="button" className="slotcity-copy-button">📄</button>
+              <span>ID: {account?.userId}</span>
+              <button
+                type="button"
+                className="slotcity-copy-button"
+                onClick={() => navigator.clipboard.writeText(account?.userId ?? "")}
+              >
+                📄
+              </button>
             </div>
           ) : (
             <div className="slotcity-sidebar-guest-auth">
@@ -79,11 +84,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </div>
 
         <div className="slotcity-sidebar-body">
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <div className="slotcity-sidebar-account-card">
               <div className="slotcity-sidebar-user-info">
-                <div className="slotcity-sidebar-user-name">vladyslavchaplygin</div>
-                <div className="slotcity-sidebar-user-status">Не верифіковано</div>
+                <div className="slotcity-sidebar-user-name">{account?.username}</div>
+                <div className="slotcity-sidebar-user-status">Баланс: {account?.balance ?? 0} ₴</div>
               </div>
 
               <div className="slotcity-sidebar-progress-bar">
@@ -96,10 +101,24 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 </div>
               </div>
 
-              <button type="button" className="slotcity-sidebar-verify-banner">
-                <span>Пройди верифікацію – отримай 50 ФС бездеп</span>
-                <span>→</span>
-              </button>
+              <div className="slotcity-sidebar-hero-actions">
+                <button
+                  type="button"
+                  className="slotcity-cta slotcity-cta-primary slotcity-sidebar-hero-action"
+                  onClick={() => {
+                    void requestDeposit("sidebar_account_deposit");
+                  }}
+                >
+                  Поповнити
+                </button>
+                <button
+                  type="button"
+                  className="slotcity-cta slotcity-cta-secondary slotcity-sidebar-hero-action"
+                  onClick={logout}
+                >
+                  Вийти
+                </button>
+              </div>
             </div>
           ) : (
             <section className="slotcity-sidebar-hero-card">
@@ -206,6 +225,38 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               ))}
             </div>
           </section>
+
+          {isAuthenticated ? (
+            <section className="slotcity-sidebar-section">
+              <strong className="slotcity-sidebar-section-title">Оператор</strong>
+              <div className="slotcity-sidebar-link-list">
+                <TrackedLink
+                  href="/operator/users"
+                  className="slotcity-sidebar-link-row"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_operator", label: "Користувачі storefront" } }}
+                >
+                  <span className="slotcity-sidebar-link-copy">
+                    <strong>Користувачі storefront</strong>
+                    <small>Реєстрація, Google-вхід, баланс і статуси</small>
+                  </span>
+                  <span className="slotcity-sidebar-link-arrow">›</span>
+                </TrackedLink>
+                <TrackedLink
+                  href="/operator/activity"
+                  className="slotcity-sidebar-link-row"
+                  event="cta_clicked"
+                  payload={{ properties: { placement: "sidebar_operator", label: "Активність користувачів" } }}
+                >
+                  <span className="slotcity-sidebar-link-copy">
+                    <strong>Активність користувачів</strong>
+                    <small>Перегляд останніх подій, запусків і депозитів</small>
+                  </span>
+                  <span className="slotcity-sidebar-link-arrow">›</span>
+                </TrackedLink>
+              </div>
+            </section>
+          ) : null}
 
           <div className="slotcity-sidebar-apps">
             <span className="slotcity-sidebar-apps-label">Застосунок SlotCity</span>

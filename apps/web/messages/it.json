@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "catalog": "Catalogo",
+    "games": "Giochi",
+    "promotions": "Promozioni",
+    "about": "Chi Siamo",
+    "help": "Aiuto",
+    "account": "Account",
+    "login": "Accedi",
+    "register": "Registrati",
+    "logout": "Esci"
+  },
+  "games": {
+    "playNow": "Gioca Ora",
+    "playDemo": "Gioca Demo",
+    "back": "Torna al Catalogo",
+    "loading": "Caricamento gioco...",
+    "error": "Errore nel caricamento del gioco",
+    "demoMode": "Modalità Demo",
+    "liveMode": "Gioca per Vero"
+  },
+  "search": {
+    "placeholder": "Cerca giochi...",
+    "noResults": "Nessun gioco trovato",
+    "filters": "Filtri",
+    "sort": "Ordina per"
+  },
+  "home": {
+    "welcome": "Benvenuto in SlotCity",
+    "featured": "Giochi in Evidenza",
+    "popular": "Giochi Popolari",
+    "new": "Giochi Nuovi",
+    "viewAll": "Visualizza Tutti i Giochi"
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "retry": "Riprova",
+    "close": "Chiudi",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "language": "Lingua"
+  }
+}

@@ -218,6 +218,70 @@ function extractHighlights(html: string) {
   return bulletItems.slice(0, 3);
 }
 
+function normalizeGameEditorialHtml(html: string) {
+  if (!html) {
+    return "";
+  }
+
+  const $ = load(`<div>${html}</div>`);
+  $("script, style, noscript, iframe, svg, picture, source, img, video, form, button, input").remove();
+
+  const blocks: string[] = [];
+  const seen = new Set<string>();
+
+  $("h2, h3, h4, p, ul, ol").each((_, element) => {
+    const tagName = element.tagName.toLowerCase();
+
+    if (tagName === "ul" || tagName === "ol") {
+      const items = $(element)
+        .find("li")
+        .map((__, item) => $(item).text().replace(/\s+/g, " ").trim())
+        .get()
+        .filter((entry) => entry.length > 0)
+        .slice(0, 8);
+
+      if (!items.length) {
+        return;
+      }
+
+      const key = `${tagName}:${items.join("|")}`;
+
+      if (seen.has(key)) {
+        return;
+      }
+
+      seen.add(key);
+      blocks.push(
+        `<${tagName}>${items.map((item) => `<li>${item}</li>`).join("")}</${tagName}>`
+      );
+      return;
+    }
+
+    const text = $(element).text().replace(/\s+/g, " ").trim();
+
+    if (!text || text.length < 24) {
+      return;
+    }
+
+    const key = `${tagName}:${text}`;
+
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    blocks.push(`<${tagName}>${text}</${tagName}>`);
+  });
+
+  const normalizedHtml = blocks.slice(0, 14).join("");
+  const normalizedText = load(`<div>${normalizedHtml}</div>`)("body")
+    .text()
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return normalizedText.length >= 120 ? normalizedHtml : "";
+}
+
 function dedupeGames(items: GameTileContent[]) {
   const map = new Map<string, GameTileContent>();
 
@@ -311,17 +375,17 @@ function buildFactFallback(
 
   if (provider) {
     facts.push({
-      label: "Provider",
+      label: "Провайдер",
       value: provider
     });
   }
 
   facts.push({
-    label: "Type",
+    label: "Тип",
     value: gameType === "live" ? "Live casino" : "Slot"
   });
   facts.push({
-    label: "Slug",
+    label: "Код гри",
     value: slug
   });
 
@@ -370,7 +434,7 @@ function buildLaunchConfig(
   record: DirectusStorefrontGameRecord | null
 ): StorefrontGameLaunchContent {
   const fallbackDemoUrl = sourceUrl || `${SOURCE_SITE_URL}/game/${slug}`;
-  const demoUrl =
+  const demoSourceUrl =
     (typeof record?.demo_url === "string" && record.demo_url.length > 0
       ? record.demo_url
       : fallbackDemoUrl) || undefined;
@@ -384,7 +448,8 @@ function buildLaunchConfig(
       (typeof record?.launch_url === "string" && record.launch_url.length > 0
         ? record.launch_url
         : `/registration?game=${slug}`) || undefined,
-    demoUrl,
+    demoUrl: demoSourceUrl ? `/game/${slug}/demo` : undefined,
+    demoSourceUrl,
     launchLabel:
       (typeof record?.launch_label === "string" && record.launch_label.length > 0
         ? record.launch_label
@@ -392,7 +457,7 @@ function buildLaunchConfig(
     demoLabel:
       (typeof record?.demo_label === "string" && record.demo_label.length > 0
         ? record.demo_label
-        : demoUrl === sourceUrl
+        : demoSourceUrl === sourceUrl
           ? FALLBACK_DEMO_SOURCE_LABEL
           : "Демо") || "Демо",
     requiresAuth: record?.requires_auth ?? true,
@@ -449,10 +514,11 @@ export async function getStorefrontGamePage(slugInput: string): Promise<Storefro
     importedPage?.heroImage ||
     fallbackTile?.image ||
     undefined;
-  const contentHtml =
+  const rawContentHtml =
     (typeof record?.content_html === "string" && record.content_html.length > 0
       ? record.content_html
       : importedPage?.html || "") || "";
+  const contentHtml = normalizeGameEditorialHtml(rawContentHtml);
   const explicitRelated = normalizeTextArray(record?.related_game_slugs);
   const highlights = normalizeTextArray(record?.highlights);
   const facts = normalizeFactArray(record?.facts);
@@ -492,7 +558,7 @@ export async function getStorefrontGamePage(slugInput: string): Promise<Storefro
         ? record.hero_image_alt
         : heading) || heading,
     badges: normalizeTextArray(record?.badges),
-    highlights: highlights.length ? highlights : extractHighlights(contentHtml),
+    highlights: highlights.length ? highlights : extractHighlights(contentHtml || rawContentHtml),
     facts: facts.length ? facts : buildFactFallback(provider, gameType, slug),
     contentHtml,
     sourceUrl,

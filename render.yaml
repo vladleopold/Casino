@@ -39,8 +39,8 @@ services:
     rootDir: release/slotcity-render-backend
     autoDeployTrigger: off
     buildCommand: corepack pnpm install --frozen-lockfile
-    startCommand: sh -c 'corepack pnpm --filter directus bootstrap && corepack pnpm --filter directus start'
-    healthCheckPath: /server/health
+    startCommand: corepack pnpm --filter directus start
+    healthCheckPath: /server/ping
     envVars:
       - key: NODE_VERSION
         value: "22"
@@ -120,10 +120,45 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      - key: DB_HOST
+        fromDatabase:
+          name: casino-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: casino-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: casino-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: casino-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: casino-db
+          property: password
+      - key: REDIS
+        fromService:
+          type: keyvalue
+          name: casino-cache
+          property: connectionString
+      - key: DIRECTUS_URL
+        value: https://casino-directus.onrender.com
+      - key: DIRECTUS_SERVICE_EMAIL
+        sync: false
+      - key: DIRECTUS_SERVICE_PASSWORD
+        sync: false
+      - key: AUTH_SERVICE_API_KEY
+        sync: false
       - key: POSTHOG_API_KEY
         sync: false
       - key: POSTHOG_HOST
         value: https://us.i.posthog.com
+      - key: EVENTS_ACTIVITY_API_KEY
+        sync: false
       - key: BRAZE_REST_API_KEY
         sync: false
       - key: BRAZE_ENDPOINT

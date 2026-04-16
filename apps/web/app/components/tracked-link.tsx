@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 
@@ -18,6 +18,7 @@ interface TrackedLinkProps {
   rel?: string;
   ariaLabel?: string;
   "aria-label"?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 function isExternalHref(href: string) {
@@ -28,19 +29,21 @@ export function TrackedLink({
   href,
   className,
   children,
-  event,
+  event: trackedEvent,
   payload,
   target,
   rel,
   ariaLabel,
-  "aria-label": ariaLabelProp
+  "aria-label": ariaLabelProp,
+  onClick
 }: TrackedLinkProps) {
   const { capture } = useSlotcityAnalytics();
   const resolvedAriaLabel = ariaLabelProp ?? ariaLabel;
   const resolvedHref = typeof href === "string" && href.length > 0 ? href : "/";
 
-  const handleClick = () => {
-    void capture(event, payload);
+  const handleClick: MouseEventHandler<HTMLAnchorElement> = (clickEvent) => {
+    void capture(trackedEvent, payload);
+    onClick?.(clickEvent);
   };
 
   if (isExternalHref(resolvedHref) || target === "_blank") {

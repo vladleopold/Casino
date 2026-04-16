@@ -2,9 +2,9 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { TrackedButton } from "./tracked-button";
 import { TrackedLink } from "./tracked-link";
+import { useSlotcityAccount } from "./account-context";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -12,8 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, route = "home" }: HeaderProps) {
-  const searchParams = useSearchParams();
-  const isLoggedIn = searchParams.get("auth") === "member";
+  const { account, isAuthenticated, requestDeposit } = useSlotcityAccount();
   const navItems: Array<{ label: string; href: string; match: string[] }> = [
     { label: "Головна", href: "/", match: ["home", "casino"] },
     { label: "Каталог", href: "/catalog", match: ["catalog", "slots"] },
@@ -45,10 +44,7 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
       </div>
 
       <Link href="/" className="slotcity-logo-link" aria-label="SlotCity home">
-        <picture>
-          <source media="(max-width: 640px)" srcSet="/slotcity/brand/logo-mini.svg" />
-          <img src="/slotcity/brand/logo.svg" alt="SlotCity" className="slotcity-logo" />
-        </picture>
+        <img src="/slotcity/brand/logo.png" alt="SlotCity" className="slotcity-logo" />
       </Link>
 
       <nav className="slotcity-header-nav" aria-label="Основні розділи">
@@ -72,7 +68,7 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
       </nav>
 
       <div className="slotcity-header-right">
-        {isLoggedIn ? (
+        {isAuthenticated ? (
           <>
             <button type="button" className="slotcity-header-notification" aria-label="Notifications">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -82,12 +78,15 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
             </button>
             
             <div className="slotcity-header-balance">
-              <span className="balance-amount">0</span>
+              <span className="balance-amount">{account?.balance ?? 0}</span>
               <span className="balance-currency">₴</span>
             </div>
 
             <TrackedButton
               className="slotcity-deposit-button"
+              onClick={() => {
+                void requestDeposit("header_deposit");
+              }}
               event="cta_clicked"
               payload={{
                 properties: {

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import Image from "next/image";
 
 import { LayoutShell } from "../components/layout-shell";
 import { MobileDock } from "../components/mobile-dock";
+import { RegistrationAuthPanel } from "../components/registration-auth-panel";
 import { Reveal } from "../components/reveal";
 import { SiteFooter } from "../components/site-footer";
 import { TrackedButton } from "../components/tracked-button";
@@ -70,6 +72,12 @@ export default function RegistrationPage() {
               <strong>500 000 ₴ + 700 ФС</strong>
               <p>Видимий бонусний блок, який веде користувача далі в каталог, акції та мобільний застосунок.</p>
             </div>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <Suspense fallback={null}>
+              <RegistrationAuthPanel />
+            </Suspense>
           </Reveal>
         </section>
 

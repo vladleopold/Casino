@@ -1101,6 +1101,56 @@ const collections: CollectionDefinition[] = [
     ]
   },
   {
+    collection: "storefront_users",
+    icon: "group",
+    displayTemplate: "{{display_name}} / {{email}}",
+    note: "Admin-visible mirror of storefront auth users stored in PostgreSQL",
+    fields: [
+      createStringField("storefront_users", "auth_user_id", "Storefront auth user id", {
+        required: true,
+        width: "full"
+      }),
+      createStringField("storefront_users", "email", "Primary email address", {
+        required: true,
+        width: "full"
+      }),
+      createStringField("storefront_users", "username", "Username", {
+        required: true
+      }),
+      createStringField("storefront_users", "display_name", "Visible display name", {
+        width: "half"
+      }),
+      createStringField("storefront_users", "auth_provider", "Auth provider", {
+        width: "half"
+      }),
+      createIntegerField("storefront_users", "balance", "Current balance in storefront"),
+      createStringField("storefront_users", "status", "User status", {
+        width: "half"
+      }),
+      createStringField("storefront_users", "avatar_url", "Avatar URL", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "google_subject", "Google subject id", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "email_verified_at", "Email verified timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "created_at", "Created at timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "updated_at", "Updated at timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "last_login_at", "Last login timestamp", {
+        width: "full"
+      }),
+      createStringField("storefront_users", "last_seen_at", "Last seen timestamp", {
+        width: "full"
+      })
+    ]
+  },
+  {
     collection: "storefront_banners",
     icon: "photo_library",
     displayTemplate: "{{route}} / {{kind}} / {{title}}",

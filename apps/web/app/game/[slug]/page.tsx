@@ -79,18 +79,40 @@ export default async function GameDetailPage({
             <span>{page.name}</span>
           </Reveal>
 
-          <section className="slotcity-game-hero">
-            <Reveal className="slotcity-game-copy" delay={0.04}>
+          <Reveal className={`slotcity-game-stage-shell accent-${page.accent}`} delay={0.04}>
+            <div className="slotcity-game-stage-head">
               <span className="slotcity-section-kicker">{page.kicker}</span>
               <h1>{page.heading}</h1>
-              <p>{page.description}</p>
+            </div>
+            <div className="slotcity-game-stage-subhead">
+              {page.provider ? <span>{page.provider}</span> : null}
+              <span>{page.gameType === "live" ? "Live casino" : "Slot"}</span>
+            </div>
+            <div className="slotcity-game-launch-shell">
+              <GameLauncher
+                slug={page.slug}
+                title={page.name}
+                provider={page.provider}
+                heroImage={page.heroImage}
+                launch={page.launch}
+              />
+            </div>
+          </Reveal>
 
-              <div className="slotcity-game-badges">
-                {page.badges.map((badge) => (
-                  <span key={badge}>{badge}</span>
-                ))}
-                {page.provider ? <span>{page.provider}</span> : null}
-              </div>
+          <section className="slotcity-game-info-stack">
+            <Reveal className="slotcity-game-details" delay={0.08}>
+              <span className="slotcity-section-kicker">{page.kicker}</span>
+              <h2>{page.heading}</h2>
+              {page.description ? <p>{page.description}</p> : null}
+
+              {page.badges.length || page.provider ? (
+                <div className="slotcity-game-badges">
+                  {page.badges.map((badge) => (
+                    <span key={badge}>{badge}</span>
+                  ))}
+                  {page.provider ? <span>{page.provider}</span> : null}
+                </div>
+              ) : null}
 
               {page.highlights.length ? (
                 <div className="slotcity-game-highlights">
@@ -104,34 +126,24 @@ export default async function GameDetailPage({
               ) : null}
             </Reveal>
 
-            <Reveal className={`slotcity-game-launch-shell accent-${page.accent}`} delay={0.08}>
-              <GameLauncher
-                slug={page.slug}
-                title={page.name}
-                provider={page.provider}
-                heroImage={page.heroImage}
-                launch={page.launch}
-              />
+            <Reveal className="slotcity-game-facts-grid" delay={0.1}>
+              {page.facts.map((fact) => (
+                <article key={`${fact.label}-${fact.value}`} className="slotcity-game-fact-card">
+                  <span>{fact.label}</span>
+                  <strong>{fact.value}</strong>
+                </article>
+              ))}
             </Reveal>
+
+            {page.contentHtml ? (
+              <Reveal className="slotcity-game-editorial" delay={0.12}>
+                <div
+                  className="slotcity-imported-html slotcity-game-editorial-html"
+                  dangerouslySetInnerHTML={{ __html: page.contentHtml }}
+                />
+              </Reveal>
+            ) : null}
           </section>
-
-          <Reveal className="slotcity-game-facts-grid" delay={0.1}>
-            {page.facts.map((fact) => (
-              <article key={`${fact.label}-${fact.value}`} className="slotcity-game-fact-card">
-                <span>{fact.label}</span>
-                <strong>{fact.value}</strong>
-              </article>
-            ))}
-          </Reveal>
-
-          {page.contentHtml ? (
-            <Reveal className="slotcity-game-editorial" delay={0.12}>
-              <div
-                className="slotcity-imported-html slotcity-game-editorial-html"
-                dangerouslySetInnerHTML={{ __html: page.contentHtml }}
-              />
-            </Reveal>
-          ) : null}
 
           {page.relatedGames.length ? (
             <Reveal className="slotcity-section slotcity-game-related" delay={0.14}>

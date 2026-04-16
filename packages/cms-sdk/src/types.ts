@@ -226,6 +226,7 @@ export interface StorefrontGameLaunchContent {
   mode: StorefrontGameLaunchMode;
   launchUrl?: string;
   demoUrl?: string;
+  demoSourceUrl?: string;
   launchLabel: string;
   demoLabel: string;
   requiresAuth: boolean;

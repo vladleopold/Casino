@@ -11,12 +11,14 @@ interface TrackedButtonProps
   children: ReactNode;
   event: PlatformEventName;
   payload?: TrackerCapturePayload;
+  onClick?: ButtonHTMLAttributes<HTMLButtonElement>["onClick"];
 }
 
 export function TrackedButton({
   children,
   event,
   payload,
+  onClick,
   type = "button",
   ...buttonProps
 }: TrackedButtonProps) {
@@ -26,8 +28,9 @@ export function TrackedButton({
     <button
       {...buttonProps}
       type={type}
-      onClick={() => {
+      onClick={(nextEvent) => {
         void capture(event, payload);
+        onClick?.(nextEvent);
       }}
     >
       {children}
