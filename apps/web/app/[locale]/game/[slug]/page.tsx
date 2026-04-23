@@ -1,7 +1,12 @@
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getStorefrontGamePage } from "@slotcity/cms-sdk";
+import {
+  adaptGameLaunchForDevice,
+  getStorefrontGamePage,
+  inferDemoDeviceKind
+} from "@slotcity/cms-sdk";
 
 import { GameLauncher } from "../../../components/game-launcher";
 import { LayoutShell } from "../../../components/layout-shell";
@@ -43,6 +48,7 @@ export default async function GameDetailPage({
 }) {
   const { slug } = await params;
   const page = await getStorefrontGamePage(slug);
+  const deviceKind = inferDemoDeviceKind((await headers()).get("user-agent"));
 
   if (!page) {
     notFound();
@@ -94,7 +100,7 @@ export default async function GameDetailPage({
                 title={page.name}
                 provider={page.provider}
                 heroImage={page.heroImage}
-                launch={page.launch}
+                launch={adaptGameLaunchForDevice(page.launch, deviceKind)}
               />
             </div>
           </Reveal>

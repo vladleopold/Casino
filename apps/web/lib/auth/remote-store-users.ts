@@ -1,7 +1,13 @@
-import type { StorefrontUser } from "./store-users";
+import type {
+  StorefrontDepositRequest,
+  StorefrontFinanceOverview,
+  StorefrontLedgerEntry,
+  StorefrontUser,
+  StorefrontUserFinanceProfile
+} from "./store-users";
 
-const AUTH_API_URL = process.env.AUTH_API_URL?.replace(/\/$/, "");
-const AUTH_SERVICE_API_KEY = process.env.AUTH_SERVICE_API_KEY;
+const AUTH_API_URL = process.env.AUTH_API_URL?.trim().replace(/\/$/, "");
+const AUTH_SERVICE_API_KEY = process.env.AUTH_SERVICE_API_KEY?.trim();
 
 interface RequestOptions {
   method?: "GET" | "POST";
@@ -158,4 +164,154 @@ export async function touchRemoteUserSeen(userId: string) {
   );
 
   return payload.user ?? null;
+}
+
+export async function createRemoteDepositRequest(input: {
+  userId: string;
+  amount: number;
+  paymentMethod: string;
+  paymentProvider?: string;
+  payerName?: string;
+  payerEmail?: string;
+  payerPhone?: string;
+  notes?: string;
+  idempotencyKey?: string;
+}) {
+  const payload = await authRequest<{ request?: StorefrontDepositRequest | null }>(
+    "/deposit-requests",
+    {
+      method: "POST",
+      body: input,
+      service: true
+    }
+  );
+
+  if (!payload.request) {
+    throw new Error("Auth service did not return a deposit request.");
+  }
+
+  return payload.request;
+}
+
+export async function listRemoteDepositRequestsForAdmin(input?: {
+  limit?: number;
+  status?: StorefrontDepositRequest["status"] | "all";
+  userId?: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (input?.limit) {
+    params.set("limit", String(input.limit));
+  }
+
+  if (input?.status) {
+    params.set("status", input.status);
+  }
+
+  if (input?.userId) {
+    params.set("userId", input.userId);
+  }
+
+  const payload = await authRequest<{ requests?: StorefrontDepositRequest[] }>(
+    `/deposit-requests?${params.toString()}`,
+    {
+      service: true
+    }
+  );
+
+  return payload.requests ?? [];
+}
+
+export async function listRemoteLedgerEntriesForAdmin(input?: {
+  limit?: number;
+  userId?: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (input?.limit) {
+    params.set("limit", String(input.limit));
+  }
+
+  if (input?.userId) {
+    params.set("userId", input.userId);
+  }
+
+  const payload = await authRequest<{ entries?: StorefrontLedgerEntry[] }>(
+    `/ledger?${params.toString()}`,
+    {
+      service: true
+    }
+  );
+
+  return payload.entries ?? [];
+}
+
+export async function approveRemoteDepositRequest(input: {
+  depositId: string;
+  approvedBy?: string | null;
+}) {
+  const payload = await authRequest<{
+    request?: StorefrontDepositRequest | null;
+    user?: StorefrontUser | null;
+    entry?: StorefrontLedgerEntry | null;
+  }>(`/deposit-requests/${encodeURIComponent(input.depositId)}/approve`, {
+    method: "POST",
+    body: {
+      approvedBy: input.approvedBy ?? null
+    },
+    service: true
+  });
+
+  return {
+    request: payload.request ?? null,
+    user: payload.user ?? null,
+    entry: payload.entry ?? null
+  };
+}
+
+export async function rejectRemoteDepositRequest(input: {
+  depositId: string;
+  rejectedBy?: string | null;
+  reason?: string | null;
+}) {
+  const payload = await authRequest<{ request?: StorefrontDepositRequest | null }>(
+    `/deposit-requests/${encodeURIComponent(input.depositId)}/reject`,
+    {
+      method: "POST",
+      body: {
+        rejectedBy: input.rejectedBy ?? null,
+        reason: input.reason ?? null
+      },
+      service: true
+    }
+  );
+
+  if (!payload.request) {
+    throw new Error("Auth service did not return a deposit request.");
+  }
+
+  return payload.request;
+}
+
+export async function getRemoteFinanceOverview() {
+  const payload = await authRequest<{ overview?: StorefrontFinanceOverview | null }>("/stats", {
+    service: true
+  });
+
+  if (!payload.overview) {
+    throw new Error("Auth service did not return finance overview.");
+  }
+
+  return payload.overview;
+}
+
+export async function getRemoteStorefrontUserFinanceProfile(userId: string) {
+  const payload = await authRequest<{ profile?: StorefrontUserFinanceProfile | null }>(
+    `/users/${encodeURIComponent(userId)}/finance`,
+    {
+      service: true
+    }
+  );
+
+  return payload.profile ?? null;
 }

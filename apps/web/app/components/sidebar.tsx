@@ -13,7 +13,8 @@ const quickLinks = [
 const primaryLinks = [
   { label: "Головна", href: "/", note: "Поточна вітрина та нові банери" },
   { label: "Каталог слотів", href: "/catalog", note: "Пошук за грою, провайдером і колекцією" },
-  { label: "Live casino", href: "/live", note: "Рулетка, blackjack, wheel-show та VIP столи" }
+  { label: "Live casino", href: "/live", note: "Рулетка, blackjack, wheel-show та VIP столи" },
+  { label: "Моє сіті", href: "/my-city", note: "Баланс, заявки на поповнення та журнал операцій" }
 ];
 
 const promoLinks = [
@@ -225,38 +226,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               ))}
             </div>
           </section>
-
-          {isAuthenticated ? (
-            <section className="slotcity-sidebar-section">
-              <strong className="slotcity-sidebar-section-title">Оператор</strong>
-              <div className="slotcity-sidebar-link-list">
-                <TrackedLink
-                  href="/operator/users"
-                  className="slotcity-sidebar-link-row"
-                  event="cta_clicked"
-                  payload={{ properties: { placement: "sidebar_operator", label: "Користувачі storefront" } }}
-                >
-                  <span className="slotcity-sidebar-link-copy">
-                    <strong>Користувачі storefront</strong>
-                    <small>Реєстрація, Google-вхід, баланс і статуси</small>
-                  </span>
-                  <span className="slotcity-sidebar-link-arrow">›</span>
-                </TrackedLink>
-                <TrackedLink
-                  href="/operator/activity"
-                  className="slotcity-sidebar-link-row"
-                  event="cta_clicked"
-                  payload={{ properties: { placement: "sidebar_operator", label: "Активність користувачів" } }}
-                >
-                  <span className="slotcity-sidebar-link-copy">
-                    <strong>Активність користувачів</strong>
-                    <small>Перегляд останніх подій, запусків і депозитів</small>
-                  </span>
-                  <span className="slotcity-sidebar-link-arrow">›</span>
-                </TrackedLink>
-              </div>
-            </section>
-          ) : null}
 
           <div className="slotcity-sidebar-apps">
             <span className="slotcity-sidebar-apps-label">Застосунок SlotCity</span>

@@ -14,6 +14,7 @@ import { LayoutShell } from "../../components/layout-shell";
 import { MobileDock } from "../../components/mobile-dock";
 import { SideRail } from "../../components/side-rail";
 import { SiteFooter } from "../../components/site-footer";
+import { TopIconCarousel } from "../../components/top-icon-carousel";
 
 const sideRailItems = [
   { id: "bonus", label: "Бонуси", short: "B" },
@@ -21,17 +22,6 @@ const sideRailItems = [
   { id: "live", label: "Live", short: "L" },
   { id: "apps", label: "App", short: "A" }
 ] as const;
-
-function MiniGamePill({ title, image }: { title: string; image: string }) {
-  return (
-    <div className="slotcity-mini-pill">
-      <div className="slotcity-mini-pill-media">
-        <Image src={image} alt={title} fill sizes="64px" />
-      </div>
-      <span>{title}</span>
-    </div>
-  );
-}
 
 function HeroDots() {
   return (
@@ -57,7 +47,6 @@ export default async function CatalogPage(props: { searchParams: Promise<{ categ
     discoveryGames,
     bonusGames,
     liveGames,
-    quickPicks,
     monthlyTop,
     providerHighlights,
     footerSignals
@@ -338,16 +327,14 @@ export default async function CatalogPage(props: { searchParams: Promise<{ categ
           }
         }}
       >
-        <TrackedScroller
-          className="slotcity-mini-shelf-track"
-          payload={{
-            shelfId: "catalog_quick_picks"
-          }}
-        >
-          {quickPicks.map((game) => (
-            <MiniGamePill key={game.id} title={game.title} image={game.image} />
-          ))}
-        </TrackedScroller>
+        <TopIconCarousel
+          items={monthlyTop.slice(0, 10).map((game, index) => ({
+            id: game.id,
+            title: game.title,
+            image: game.image,
+            rank: game.rank ?? String(index + 1)
+          }))}
+        />
       </Reveal>
 
       <Reveal

@@ -2100,6 +2100,24 @@ a {
   color: #081108;
 }
 
+.slotcity-auth-button-google {
+  gap: 0.35rem;
+  background: linear-gradient(180deg, #ffd84c 0%, #ffce00 100%);
+  color: #10130f;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 12px 28px rgba(255, 206, 0, 0.14);
+}
+
+.slotcity-auth-button-google-word {
+  font-weight: 800;
+}
+
+.slotcity-auth-button-google:disabled {
+  opacity: 0.72;
+}
+
 .slotcity-hero-grid,
 .slotcity-game-grid,
 .slotcity-live-grid {
@@ -2640,7 +2658,7 @@ a {
 }
 
 .slotcity-hero-card {
-  height: 260px;
+  min-height: 360px;
   display: flex;
   flex-direction: column;
 }
@@ -2707,9 +2725,9 @@ a {
 }
 
 .slotcity-hero-copy {
-  width: min(500px, 100%);
+  width: min(620px, 100%);
   height: 100%;
-  padding: 24px 22px 20px;
+  padding: 28px 26px 24px;
 }
 
 .slotcity-side-copy {
@@ -2741,10 +2759,10 @@ a {
 }
 
 .slotcity-hero-copy h1 {
-  max-width: 8ch;
+  max-width: 11ch;
   margin-top: 14px;
   font-size: clamp(2.5rem, 4.4vw, 4.6rem);
-  line-height: 0.94;
+  line-height: 0.92;
 }
 
 .slotcity-side-copy h2,
@@ -3063,11 +3081,67 @@ a {
   z-index: 1;
 }
 
+.slotcity-banner-copy,
+.slotcity-partner-copy {
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  gap: 10px;
+}
+
+.slotcity-banner-copy .slotcity-section-kicker,
+.slotcity-partner-copy .slotcity-section-kicker {
+  position: relative;
+  min-height: 34px;
+  padding: 0 14px;
+  background: rgba(41, 47, 56, 0.78);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.slotcity-banner-copy h2,
+.slotcity-partner-copy h2 {
+  width: fit-content;
+  max-width: min(18ch, 100%);
+  margin: 0;
+  padding: 14px 18px 15px;
+  border-radius: 24px;
+  background: rgba(41, 47, 56, 0.76);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+}
+
+.slotcity-banner-copy p,
+.slotcity-partner-copy p {
+  width: fit-content;
+  max-width: min(60ch, 100%);
+  margin: 0;
+  padding: 14px 18px 16px;
+  border-radius: 22px;
+  background: rgba(41, 47, 56, 0.7);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+}
+
 .slotcity-provider-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
+  width: fit-content;
+  margin-top: 0;
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: rgba(41, 47, 56, 0.64);
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
 }
 
 .slotcity-provider-pills span {
@@ -3076,8 +3150,8 @@ a {
   min-height: 30px;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #d6dde6;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef2f7;
   font-size: 0.76rem;
   font-weight: 600;
 }
@@ -3094,16 +3168,20 @@ a {
   min-height: 36px;
   padding: 0 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(41, 47, 56, 0.76);
   color: #ffce00;
   font-size: 0.84rem;
   font-weight: 600;
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
 }
 
 .slotcity-mini-shelf {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+  --slotcity-top10-gap: clamp(18px, 1.8vw, 28px);
+  display: block;
+  width: 100%;
   margin-top: 14px;
 }
 
@@ -3111,6 +3189,126 @@ a {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
+}
+
+.slotcity-top10-carousel {
+  position: relative;
+  width: 100%;
+}
+
+.slotcity-top10-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding: 8px 0 18px;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(0, 0, 0, 0.96) 2%,
+    rgba(0, 0, 0, 0.96) 98%,
+    transparent 100%
+  );
+}
+
+.slotcity-top10-marquee {
+  display: flex;
+  gap: var(--slotcity-top10-gap);
+  width: max-content;
+  animation: slotcity-top10-marquee-right 74s linear infinite;
+  will-change: transform;
+}
+
+.slotcity-top10-carousel:hover .slotcity-top10-marquee {
+  animation-play-state: paused;
+}
+
+.slotcity-top10-track {
+  display: flex;
+  gap: var(--slotcity-top10-gap);
+  flex: 0 0 auto;
+  min-width: max-content;
+}
+
+.slotcity-top10-chip {
+  flex: 0 0 clamp(128px, 9.5vw, 164px);
+  display: block;
+}
+
+.slotcity-top10-chip-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 36px;
+  border: 1px solid rgba(255, 206, 0, 0.14);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 206, 0, 0.24), transparent 46%),
+    linear-gradient(180deg, rgba(21, 27, 34, 0.96), rgba(11, 14, 18, 0.98));
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.slotcity-top10-chip-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(5, 7, 10, 0) 40%, rgba(5, 7, 10, 0.34) 100%);
+  pointer-events: none;
+}
+
+.slotcity-top10-chip-media img {
+  object-fit: cover;
+  transform: scale(1.04);
+}
+
+.slotcity-top10-chip-rank {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd84d 0%, #ffce00 100%);
+  color: #11161c;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    0 10px 18px rgba(255, 206, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+.slotcity-top10-chip:hover .slotcity-top10-chip-media {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 206, 0, 0.38);
+  box-shadow:
+    0 20px 34px rgba(0, 0, 0, 0.28),
+    0 0 26px rgba(255, 206, 0, 0.18);
+}
+
+.slotcity-top10-chip:active .slotcity-top10-chip-media {
+  transform: translateY(-1px) scale(0.985);
+}
+
+@keyframes slotcity-top10-marquee-right {
+  from {
+    transform: translateX(calc(-50% - (var(--slotcity-top10-gap) / 2)));
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 .slotcity-mini-pill {
@@ -3296,6 +3494,161 @@ a {
 .slotcity-sticky-cta strong {
   font-size: 0.94rem;
   line-height: 1.15;
+}
+
+.slotcity-deposit-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.slotcity-deposit-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(3, 6, 10, 0.76);
+  backdrop-filter: blur(8px);
+}
+
+.slotcity-deposit-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1080px);
+  max-height: min(88vh, 980px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 206, 0, 0.08), transparent 24%),
+    linear-gradient(145deg, rgba(8, 11, 15, 0.98), rgba(12, 18, 24, 0.98));
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.48);
+}
+
+.slotcity-deposit-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.slotcity-deposit-modal-header h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.slotcity-deposit-modal-header p {
+  margin: 12px 0 0;
+  max-width: 68ch;
+  color: #b8c2cc;
+  line-height: 1.65;
+}
+
+.slotcity-deposit-modal-close {
+  flex: 0 0 auto;
+}
+
+.slotcity-deposit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.slotcity-deposit-panel,
+.slotcity-deposit-modal-success {
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.slotcity-deposit-presets,
+.slotcity-deposit-methods,
+.slotcity-deposit-summary,
+.slotcity-deposit-modal-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.slotcity-deposit-presets {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-top: 12px;
+}
+
+.slotcity-deposit-preset,
+.slotcity-deposit-method {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #f4f7fa;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.slotcity-deposit-preset {
+  min-height: 48px;
+  padding: 0 14px;
+  font-weight: 700;
+}
+
+.slotcity-deposit-method {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.slotcity-deposit-preset.is-active,
+.slotcity-deposit-method.is-active {
+  border-color: rgba(255, 206, 0, 0.42);
+  background: rgba(255, 206, 0, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 206, 0, 0.12), 0 12px 28px rgba(255, 206, 0, 0.08);
+}
+
+.slotcity-deposit-summary > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.slotcity-deposit-summary > div:last-child {
+  border-bottom: 0;
+}
+
+.slotcity-deposit-modal-actions {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .slotcity-deposit-modal-layer {
+    padding: 14px;
+  }
+
+  .slotcity-deposit-modal-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .slotcity-deposit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .slotcity-deposit-modal-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .slotcity-sr-only {
@@ -4290,11 +4643,11 @@ a {
 }
 
 .slotcity-live-console {
-  min-height: 380px;
+  min-height: 430px;
 }
 
 .slotcity-live-hero-grid .slotcity-hero-card-primary {
-  min-height: 380px;
+  min-height: 430px;
   height: 100%;
 }
 
@@ -4303,10 +4656,10 @@ a {
   z-index: 3;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 14px;
   height: 100%;
-  padding: 26px;
+  padding: 28px;
 }
 
 .slotcity-live-console-head {
@@ -4496,7 +4849,8 @@ a {
 
 .slotcity-route-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.72fr);
+  grid-template-columns: minmax(0, 1.32fr) minmax(360px, 0.8fr);
+  align-items: stretch;
   gap: 16px;
   margin-top: 16px;
 }
@@ -4508,14 +4862,20 @@ a {
   gap: 16px;
 }
 
+.slotcity-route-side-stack {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
 .slotcity-route-side-card {
-  min-height: 238px;
+  min-height: 264px;
+  height: 100%;
 }
 
 .slotcity-route-side-link {
   position: relative;
   display: block;
-  min-height: 238px;
+  min-height: 264px;
+  height: 100%;
 }
 
 .slotcity-route-side-copy {
@@ -4524,8 +4884,9 @@ a {
   display: grid;
   gap: 10px;
   align-content: end;
-  min-height: 238px;
-  padding: 22px;
+  min-height: 264px;
+  height: 100%;
+  padding: 24px;
 }
 
 .slotcity-route-side-copy strong {
@@ -4553,6 +4914,30 @@ a {
   grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
   gap: 18px;
   margin-top: 16px;
+}
+
+.slotcity-route-page .slotcity-hero-card-primary,
+.slotcity-promotions-page .slotcity-hero-card-primary {
+  min-height: 544px;
+}
+
+.slotcity-route-page .slotcity-hero-copy,
+.slotcity-promotions-page .slotcity-hero-copy {
+  width: min(680px, 100%);
+  justify-content: flex-end;
+}
+
+.slotcity-route-page .slotcity-hero-copy h1,
+.slotcity-promotions-page .slotcity-hero-copy h1 {
+  max-width: 12ch;
+  font-size: clamp(3rem, 4.6vw, 5.2rem);
+}
+
+.slotcity-catalog-page .slotcity-hero-card-primary,
+.slotcity-catalog-page .slotcity-catalog-console,
+.slotcity-live-page .slotcity-hero-card-primary,
+.slotcity-live-page .slotcity-live-console {
+  min-height: 430px;
 }
 
 .slotcity-registration-copy,
@@ -5076,14 +5461,24 @@ a {
 
   .slotcity-home-page .slotcity-banner-copy h2,
   .slotcity-home-page .slotcity-partner-copy h2 {
+    padding: 12px 14px 13px;
+    border-radius: 18px;
     font-size: 1.15rem;
     line-height: 1.02;
   }
 
   .slotcity-home-page .slotcity-banner-copy p,
   .slotcity-home-page .slotcity-partner-copy p {
+    padding: 11px 14px 13px;
+    border-radius: 18px;
     font-size: 0.82rem;
     line-height: 1.4;
+  }
+
+  .slotcity-home-page .slotcity-banner-copy .slotcity-section-kicker,
+  .slotcity-home-page .slotcity-partner-copy .slotcity-section-kicker {
+    min-height: 30px;
+    padding: 0 12px;
   }
 
   .slotcity-home-page .slotcity-mini-shelf {
@@ -5246,12 +5641,20 @@ a {
 
   .slotcity-catalog-page .slotcity-partner-copy h2,
   .slotcity-live-page .slotcity-partner-copy h2 {
+    padding: 12px 14px 13px;
+    border-radius: 18px;
     font-size: 1.12rem;
     line-height: 1.04;
   }
 
   .slotcity-catalog-page .slotcity-partner-copy p,
-  .slotcity-live-page .slotcity-partner-copy p,
+  .slotcity-live-page .slotcity-partner-copy p {
+    padding: 11px 14px 13px;
+    border-radius: 18px;
+    font-size: 0.82rem;
+    line-height: 1.42;
+  }
+
   .slotcity-catalog-page .slotcity-catalog-section-note {
     font-size: 0.82rem;
     line-height: 1.42;
@@ -5260,7 +5663,8 @@ a {
   .slotcity-catalog-page .slotcity-provider-pills,
   .slotcity-live-page .slotcity-provider-pills {
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 0;
+    padding: 8px 10px;
   }
 
   .slotcity-catalog-page .slotcity-provider-pills span,
@@ -5297,12 +5701,63 @@ a {
   }
 
   .slotcity-mini-shelf {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 10px;
   }
 
   .slotcity-mini-shelf-track,
   .slotcity-game-grid-experiment {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .slotcity-top10-viewport {
+    padding: 6px 0 10px;
+    mask-image: none;
+  }
+
+  .slotcity-top10-marquee {
+    gap: 10px;
+    animation-duration: 42s;
+  }
+
+  .slotcity-top10-track {
+    gap: 10px;
+  }
+
+  .slotcity-top10-chip {
+    flex-basis: 112px;
+    gap: 8px;
+  }
+
+  .slotcity-top10-chip-media {
+    border-radius: 24px;
+  }
+
+  .slotcity-top10-chip-rank {
+    right: 8px;
+    bottom: 8px;
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+  }
+
+  .slotcity-top10-chip strong {
+    font-size: 0.75rem;
+  }
+
+  .slotcity-top10-carousel:hover .slotcity-top10-marquee {
+    animation-play-state: running;
+  }
+
+  .slotcity-top10-marquee,
+  .slotcity-top10-track {
+    width: max-content;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slotcity-top10-marquee {
+      animation: none;
+      transform: none;
+    }
   }
 
   .slotcity-catalog-search-shell {
@@ -7390,5 +7845,1087 @@ a {
   .slotcity-activity-event-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+.slotcity-admin-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 24%),
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.06), transparent 22%),
+    #0b1118;
+}
+
+.slotcity-wallet-shell {
+  --slotcity-admin-bg: #0e141b;
+  --slotcity-admin-panel: #131b24;
+  --slotcity-admin-panel-soft: #19232d;
+  --slotcity-admin-line: rgba(255, 255, 255, 0.075);
+  --slotcity-admin-copy: #edf2ff;
+  --slotcity-admin-muted: #9eabbc;
+  --slotcity-chart-green: #3bd16f;
+  --slotcity-chart-blue: #52a4ff;
+  --slotcity-chart-amber: #f5c542;
+  --slotcity-chart-red: #ff6b5f;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--slotcity-admin-bg);
+  color: var(--slotcity-admin-copy);
+}
+
+.slotcity-wallet-sidebar {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 22px;
+  padding: 20px 16px;
+  border-right: 1px solid var(--slotcity-admin-line);
+  background:
+    linear-gradient(180deg, rgba(17, 24, 32, 0.98), rgba(12, 18, 25, 0.98)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02), transparent);
+}
+
+.slotcity-wallet-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.slotcity-wallet-brand span {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.slotcity-wallet-nav {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.slotcity-wallet-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: var(--slotcity-admin-muted);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.slotcity-wallet-nav-item:hover,
+.slotcity-wallet-nav-item.is-active {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fbff;
+  transform: translateX(2px);
+}
+
+.slotcity-wallet-nav-item i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #dce4f3;
+  font-style: normal;
+  font-size: 0.68rem;
+}
+
+.slotcity-wallet-support,
+.slotcity-wallet-admin {
+  padding: 14px;
+  border: 1px solid var(--slotcity-admin-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.slotcity-wallet-support {
+  display: grid;
+  gap: 4px;
+}
+
+.slotcity-wallet-support span,
+.slotcity-wallet-admin span {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.84rem;
+}
+
+.slotcity-wallet-admin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slotcity-wallet-admin-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f9d04c, #e4b318);
+  color: #0d1118;
+  font-weight: 800;
+}
+
+.slotcity-wallet-main {
+  display: grid;
+  gap: 16px;
+  padding: 18px 20px 24px;
+}
+
+.slotcity-wallet-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.slotcity-wallet-topbar h1,
+.slotcity-wallet-chart-head h3 {
+  margin: 0;
+  font-size: 1.85rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.slotcity-wallet-topbar p,
+.slotcity-wallet-chart-meta,
+.slotcity-wallet-caption {
+  margin: 0;
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--slotcity-admin-muted);
+  font-size: 0.86rem;
+}
+
+.slotcity-wallet-topbar-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.slotcity-wallet-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--slotcity-admin-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f6fb;
+  cursor: pointer;
+}
+
+.slotcity-wallet-live-ping {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--slotcity-chart-green);
+  box-shadow: 0 0 0 4px rgba(59, 209, 111, 0.12);
+}
+
+.slotcity-wallet-alert-badge {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 107, 95, 0.18);
+  color: #ffb0a8;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.slotcity-wallet-stat-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.slotcity-wallet-metric-card,
+.slotcity-wallet-card {
+  border: 1px solid var(--slotcity-admin-line);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(23, 31, 41, 0.98), rgba(18, 25, 34, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+.slotcity-wallet-metric-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.slotcity-wallet-metric-card span,
+.slotcity-wallet-kicker {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.79rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotcity-wallet-metric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.slotcity-wallet-metric-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #dfe7f2;
+  font-style: normal;
+  font-size: 1rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.slotcity-wallet-metric-card.is-green .slotcity-wallet-metric-icon {
+  color: var(--slotcity-chart-green);
+  border-color: rgba(59, 209, 111, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(59, 209, 111, 0.08), 0 0 0 4px rgba(59, 209, 111, 0.04);
+}
+
+.slotcity-wallet-metric-card.is-gold .slotcity-wallet-metric-icon {
+  color: var(--slotcity-chart-amber);
+  border-color: rgba(245, 197, 66, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, 0.08), 0 0 0 4px rgba(245, 197, 66, 0.04);
+}
+
+.slotcity-wallet-metric-card.is-red .slotcity-wallet-metric-icon {
+  color: var(--slotcity-chart-red);
+  border-color: rgba(255, 107, 95, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(255, 107, 95, 0.08), 0 0 0 4px rgba(255, 107, 95, 0.04);
+}
+
+.slotcity-wallet-metric-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.slotcity-wallet-metric-card small {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.84rem;
+}
+
+.slotcity-wallet-metric-foot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slotcity-wallet-metric-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.slotcity-wallet-metric-live.is-green {
+  background: var(--slotcity-chart-green);
+}
+
+.slotcity-wallet-metric-live.is-gold {
+  background: var(--slotcity-chart-amber);
+}
+
+.slotcity-wallet-metric-live.is-red {
+  background: var(--slotcity-chart-red);
+}
+
+.slotcity-wallet-metric-card.is-green strong {
+  color: var(--slotcity-chart-green);
+}
+
+.slotcity-wallet-metric-card.is-gold strong {
+  color: var(--slotcity-chart-amber);
+}
+
+.slotcity-wallet-metric-card.is-red strong {
+  color: var(--slotcity-chart-red);
+}
+
+.slotcity-wallet-board {
+  display: grid;
+  grid-template-columns: 1.08fr 1.18fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.slotcity-wallet-column {
+  display: grid;
+  gap: 12px;
+}
+
+.slotcity-wallet-column-wide {
+  grid-template-rows: auto auto auto;
+}
+
+.slotcity-wallet-bottom-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1.12fr 1fr;
+  gap: 12px;
+}
+
+.slotcity-wallet-card {
+  padding: 14px;
+}
+
+.slotcity-wallet-card-alert {
+  background:
+    linear-gradient(180deg, rgba(42, 22, 22, 0.92), rgba(30, 16, 16, 0.96)),
+    #1a1417;
+}
+
+.slotcity-wallet-card-row {
+  display: grid;
+  gap: 14px;
+}
+
+.slotcity-wallet-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.slotcity-wallet-card-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.slotcity-wallet-chart-head h3 {
+  font-size: 1.05rem;
+}
+
+.slotcity-wallet-viewall {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #dfe7f2;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.slotcity-wallet-viewall:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.slotcity-wallet-viewall.danger {
+  border-color: rgba(255, 107, 95, 0.22);
+  background: rgba(255, 107, 95, 0.12);
+  color: #ffaea6;
+}
+
+.slotcity-wallet-feed-list,
+.slotcity-wallet-risk-list,
+.slotcity-payments-list {
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-feed-row,
+.slotcity-wallet-risk-row,
+.slotcity-payment-row,
+.slotcity-wallet-table-row {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.slotcity-wallet-feed-row,
+.slotcity-wallet-table-head,
+.slotcity-wallet-table-row {
+  grid-template-columns: 74px 1.15fr 1fr 0.8fr;
+}
+
+.slotcity-wallet-feed-row span,
+.slotcity-wallet-feed-row b,
+.slotcity-wallet-table-head,
+.slotcity-wallet-table-row span,
+.slotcity-wallet-table-row em,
+.slotcity-wallet-risk-row span,
+.slotcity-payment-row p,
+.slotcity-payment-row small {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.84rem;
+}
+
+.slotcity-wallet-feed-row strong,
+.slotcity-wallet-table-row strong,
+.slotcity-payment-row strong,
+.slotcity-wallet-risk-row strong {
+  font-size: 0.95rem;
+}
+
+.slotcity-wallet-feed-row em,
+.slotcity-wallet-table-row em,
+.slotcity-payment-status,
+.slotcity-wallet-player-stats strong {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.slotcity-wallet-feed-row em.is-positive,
+.slotcity-wallet-table-row em.is-approved,
+.slotcity-payment-status.is-approved,
+.slotcity-payment-status.is-posted {
+  color: var(--slotcity-chart-green);
+}
+
+.slotcity-wallet-feed-row em.is-negative,
+.slotcity-wallet-table-row em.is-rejected,
+.slotcity-payment-status.is-rejected {
+  color: var(--slotcity-chart-red);
+}
+
+.slotcity-wallet-feed-row em.is-warning,
+.slotcity-wallet-table-row em.is-pending,
+.slotcity-payment-status.is-pending {
+  color: var(--slotcity-chart-amber);
+}
+
+.slotcity-wallet-risk-row {
+  grid-template-columns: 1fr auto;
+}
+
+.slotcity-wallet-risk-row b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255, 107, 95, 0.16);
+  color: var(--slotcity-chart-red);
+}
+
+.slotcity-wallet-risk-list.compact {
+  gap: 0;
+}
+
+.slotcity-wallet-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.slotcity-wallet-mini-card {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.slotcity-wallet-timechart {
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-timechart-svg {
+  width: 100%;
+  height: 180px;
+  overflow: visible;
+}
+
+.slotcity-wallet-mini-card .slotcity-wallet-timechart-svg,
+.slotcity-wallet-mini-card .slotcity-wallet-combo .slotcity-wallet-timechart-svg {
+  height: 112px;
+}
+
+.slotcity-wallet-chart-gridline {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.slotcity-wallet-chart-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.slotcity-wallet-chart-line.is-dashed {
+  stroke-dasharray: 10 9;
+}
+
+.slotcity-wallet-chart-area {
+  opacity: 0.16;
+}
+
+.slotcity-wallet-chart-axis,
+.slotcity-wallet-chart-metrics,
+.slotcity-wallet-legend {
+  display: grid;
+  gap: 10px;
+}
+
+.slotcity-wallet-chart-axis {
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  color: #8090a4;
+  font-size: 0.72rem;
+}
+
+.slotcity-wallet-chart-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.slotcity-wallet-chart-metrics strong {
+  display: block;
+  font-size: 0.94rem;
+}
+
+.slotcity-wallet-chart-metrics span {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.76rem;
+}
+
+.slotcity-wallet-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.slotcity-wallet-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slotcity-admin-muted);
+  font-size: 0.76rem;
+}
+
+.slotcity-wallet-legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.slotcity-wallet-empty-state {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  min-height: 180px;
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-empty-chart {
+  position: relative;
+  height: 76px;
+}
+
+.slotcity-wallet-empty-chart span {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.slotcity-wallet-empty-chart span:nth-child(1) {
+  top: 16px;
+}
+
+.slotcity-wallet-empty-chart span:nth-child(2) {
+  top: 38px;
+}
+
+.slotcity-wallet-empty-chart span:nth-child(3) {
+  top: 60px;
+}
+
+.slotcity-wallet-scatter-dot {
+  fill: rgba(255, 107, 95, 0.72);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+}
+
+.slotcity-wallet-combo {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-combo-bars {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 118px;
+}
+
+.slotcity-wallet-combo-column {
+  display: flex;
+  align-items: end;
+  height: 100%;
+}
+
+.slotcity-wallet-combo-bar {
+  width: 100%;
+  border-radius: 999px 999px 10px 10px;
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.96), rgba(179, 122, 20, 0.88));
+}
+
+.slotcity-wallet-combo-line {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.slotcity-wallet-heatmap-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-heatmap-head,
+.slotcity-wallet-heatmap-row {
+  display: grid;
+  grid-template-columns: 90px repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.slotcity-wallet-heatmap-head {
+  color: var(--slotcity-admin-muted);
+  font-size: 0.74rem;
+}
+
+.slotcity-wallet-heatmap-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border-radius: 10px;
+  background: rgba(59, 209, 111, calc(var(--slotcity-heat) * 0.68));
+  color: #f8fbff;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.slotcity-wallet-funnel {
+  display: grid;
+  gap: 14px;
+}
+
+.slotcity-wallet-funnel-row {
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-funnel-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.slotcity-wallet-funnel-bar-shell {
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.slotcity-wallet-funnel-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7b8795, #b6c2d2);
+}
+
+.slotcity-wallet-funnel-bar.is-gold {
+  background: linear-gradient(90deg, #f5c542, #ffd972);
+}
+
+.slotcity-wallet-funnel-bar.is-green {
+  background: linear-gradient(90deg, #27c763, #53e188);
+}
+
+.slotcity-wallet-table {
+  display: grid;
+  gap: 8px;
+}
+
+.slotcity-wallet-table-head {
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--slotcity-admin-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotcity-wallet-table-row {
+  padding: 8px 0;
+}
+
+.slotcity-wallet-table.is-compact .slotcity-wallet-table-head,
+.slotcity-wallet-table.is-compact .slotcity-wallet-table-row {
+  grid-template-columns: 1.3fr 1fr 0.7fr;
+}
+
+.slotcity-wallet-player-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.slotcity-wallet-player-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.slotcity-wallet-player-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(245, 197, 66, 0.18);
+  color: #ffd972;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.slotcity-wallet-player-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.slotcity-wallet-player-card span,
+.slotcity-wallet-player-card small {
+  display: block;
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-player-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.slotcity-wallet-player-stats > div {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.slotcity-wallet-player-stats span {
+  display: block;
+  color: var(--slotcity-admin-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotcity-wallet-player-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.slotcity-wallet-action {
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7fbff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.slotcity-wallet-action.danger {
+  background: rgba(255, 107, 95, 0.2);
+}
+
+.slotcity-wallet-action.gold {
+  background: rgba(245, 197, 66, 0.22);
+}
+
+.slotcity-wallet-action.blue {
+  background: rgba(82, 164, 255, 0.24);
+}
+
+.slotcity-wallet-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  min-width: 220px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-search span {
+  font-size: 0.92rem;
+}
+
+.slotcity-wallet-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #edf2ff;
+  font-size: 0.84rem;
+}
+
+.slotcity-wallet-search input::placeholder {
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slotcity-wallet-pill {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--slotcity-admin-muted);
+  cursor: pointer;
+}
+
+.slotcity-wallet-pill.is-active {
+  border-color: rgba(245, 197, 66, 0.4);
+  background: rgba(245, 197, 66, 0.12);
+  color: #fff4be;
+}
+
+.slotcity-wallet-empty-copy {
+  color: var(--slotcity-admin-muted);
+}
+
+.slotcity-wallet-login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 197, 66, 0.08), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(82, 164, 255, 0.08), transparent 32%),
+    #0b1118;
+}
+
+.slotcity-wallet-login-card {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(19, 27, 36, 0.98), rgba(14, 20, 27, 0.98));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+}
+
+.slotcity-wallet-login-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  width: max-content;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(245, 197, 66, 0.14);
+  color: #ffd972;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.slotcity-wallet-login-card h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.slotcity-wallet-login-card p {
+  margin: 0;
+  color: #aab6c6;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.slotcity-auth-button-google-ops {
+  min-height: 66px;
+  font-size: 1.12rem;
+}
+
+.slotcity-wallet-inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 180px 160px;
+  gap: 12px;
+}
+
+.slotcity-wallet-inline-form input,
+.slotcity-wallet-inline-form select {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #edf2ff;
+  font-size: 0.95rem;
+}
+
+.slotcity-wallet-inline-form input::placeholder {
+  color: #7f8b9e;
+}
+
+.slotcity-wallet-inline-form select {
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .slotcity-wallet-login-card {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .slotcity-wallet-inline-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.slotcity-partner-banner::before {
+  background:
+    linear-gradient(90deg, rgba(8, 11, 15, 0.92) 0%, rgba(10, 14, 20, 0.46) 42%, rgba(10, 14, 20, 0.82) 100%),
+    linear-gradient(180deg, rgba(6, 8, 12, 0.08), rgba(6, 8, 12, 0.34));
+}
+
+.slotcity-partner-copy h2,
+.slotcity-partner-copy p,
+.slotcity-provider-pills,
+.slotcity-partner-accent span {
+  background: rgba(41, 47, 56, 0.82);
+}
+
+.slotcity-partner-copy h2 {
+  max-width: min(20ch, 100%);
+}
+
+.slotcity-partner-copy p {
+  max-width: min(58ch, 100%);
+}
+
+.slotcity-top10-track {
+  min-width: max(100%, max-content);
+  justify-content: space-between;
+}
+
+.slotcity-top10-chip {
+  flex: 0 0 clamp(188px, 13vw, 236px);
+}
+
+.slotcity-top10-chip-media {
+  border-radius: 42px;
+}
+
+.slotcity-top10-marquee {
+  animation-duration: 92s;
+}
+
+@media (max-width: 1480px) {
+  .slotcity-wallet-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .slotcity-wallet-stat-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .slotcity-wallet-board,
+  .slotcity-wallet-bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .slotcity-wallet-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .slotcity-wallet-sidebar {
+    display: none;
+  }
+
+  .slotcity-wallet-main {
+    padding: 14px;
+  }
+
+  .slotcity-wallet-topbar,
+  .slotcity-wallet-card-toolbar,
+  .slotcity-wallet-player-actions,
+  .slotcity-wallet-player-stats,
+  .slotcity-wallet-mini-grid,
+  .slotcity-wallet-stat-row {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .slotcity-wallet-feed-row,
+  .slotcity-wallet-table-head,
+  .slotcity-wallet-table-row,
+  .slotcity-wallet-heatmap-head,
+  .slotcity-wallet-heatmap-row {
+    grid-template-columns: 1fr;
+  }
+
+  .slotcity-wallet-timechart-svg {
+    height: 150px;
   }
 }

@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 
 import { getImportedPagePayload } from "./imported-pages";
+import { buildSlotcityDemoLookupKeys, findSlotcityDemoFallbackUrl } from "./slotcity-demo-fallbacks";
 import {
   getCatalogRouteContent,
   getHomeRouteContent,
@@ -71,6 +72,11 @@ interface DirectusStorefrontGameRecord {
   extracted_at?: string | null;
 }
 
+interface SlotcityDemoApiResponse {
+  status?: boolean;
+  url?: string;
+}
+
 const DIRECTUS_URL = process.env.DIRECTUS_URL?.replace(/\/$/, "");
 const CONTENT_MODE = process.env.STOREFRONT_CONTENT_MODE ?? "mock";
 const DIRECTUS_FETCH_TIMEOUT_MS = Number.parseInt(
@@ -81,7 +87,7 @@ const SOURCE_SITE_URL = (process.env.SLOTCITY_SOURCE_SITE_URL ?? "https://slotci
   /\/$/,
   ""
 );
-const FALLBACK_DEMO_SOURCE_LABEL = "Демо на SlotCity";
+const FALLBACK_DEMO_SOURCE_LABEL = "Демо";
 
 let gamePoolPromise: Promise<Map<string, GameTileContent>> | null = null;
 
@@ -118,6 +124,26 @@ function buildAssetUrl(image?: DirectusImageRef, imageUrl?: string | null) {
   }
 
   return imageUrl ?? "";
+}
+
+function normalizeLaunchValue(value?: string | null) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+
+  if (
+    !normalized ||
+    normalized === "$undefined" ||
+    normalized === "undefined" ||
+    normalized === "$null" ||
+    normalized === "null"
+  ) {
+    return undefined;
+  }
+
+  return normalized;
 }
 
 function normalizeTextArray(value: unknown) {
@@ -159,6 +185,27 @@ function normalizeSlug(input: string) {
     .replace(/^\/+|\/+$/g, "")
     .replace(/^game\//, "")
     .trim();
+}
+
+function isSlotcityGamePageUrl(value?: string) {
+  if (!value) {
+    return false;
+  }
+
+  return (
+    value.startsWith(`${SOURCE_SITE_URL}/game/`) ||
+    value.startsWith("/game/")
+  );
+}
+
+function toEmbeddableUrl(value?: string) {
+  const normalized = normalizeLaunchValue(value);
+
+  if (!normalized || isSlotcityGamePageUrl(normalized)) {
+    return undefined;
+  }
+
+  return normalized;
 }
 
 function stripGamePrefix(value: string) {
@@ -428,26 +475,85 @@ function buildRelatedGames(
     .slice(0, 8);
 }
 
-function buildLaunchConfig(
+async function resolveSlotcityDemoSource(
   slug: string,
+  name?: string,
+  explicitDemoUrl?: string,
+  sourceUrl?: string
+) {
+  const directDemoUrl = normalizeLaunchValue(explicitDemoUrl);
+  const embeddableDirectDemoUrl = toEmbeddableUrl(directDemoUrl);
+
+  if (embeddableDirectDemoUrl) {
+    return embeddableDirectDemoUrl;
+  }
+
+  const fallbackSourceUrl = normalizeLaunchValue(sourceUrl);
+  const embeddableFallbackSourceUrl = toEmbeddableUrl(fallbackSourceUrl);
+
+  if (embeddableFallbackSourceUrl) {
+    return embeddableDirectDemoUrl ?? embeddableFallbackSourceUrl;
+  }
+
+  const providerFallback = findSlotcityDemoFallbackUrl(slug, name);
+
+  if (providerFallback?.url) {
+    return providerFallback.url;
+  }
+
+  for (const lookupTerm of buildSlotcityDemoLookupKeys(slug, name)) {
+    try {
+      const response = await fetchDirectus(
+        `${SOURCE_SITE_URL}/apiv2/games/demo?term=${encodeURIComponent(
+          lookupTerm
+        )}&language=uk&check_limits=1&version=desktop`,
+        {
+          next: {
+            revalidate: 300
+          }
+        } as NextFetchInit
+      );
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const payload = (await response.json()) as SlotcityDemoApiResponse;
+      const resolvedUrl = normalizeLaunchValue(payload.url);
+      const embeddableResolvedUrl = toEmbeddableUrl(resolvedUrl);
+
+      if (embeddableResolvedUrl) {
+        return embeddableResolvedUrl;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return embeddableDirectDemoUrl ?? embeddableFallbackSourceUrl;
+}
+
+async function buildLaunchConfig(
+  slug: string,
+  name: string,
   sourceUrl: string | undefined,
   record: DirectusStorefrontGameRecord | null
-): StorefrontGameLaunchContent {
-  const fallbackDemoUrl = sourceUrl || `${SOURCE_SITE_URL}/game/${slug}`;
-  const demoSourceUrl =
-    (typeof record?.demo_url === "string" && record.demo_url.length > 0
-      ? record.demo_url
-      : fallbackDemoUrl) || undefined;
+): Promise<StorefrontGameLaunchContent> {
+  const fallbackDemoUrl = normalizeLaunchValue(sourceUrl);
+  const demoSourceUrl = await resolveSlotcityDemoSource(
+    slug,
+    name,
+    normalizeLaunchValue(record?.demo_url),
+    fallbackDemoUrl
+  );
+  const explicitLaunchUrl = normalizeLaunchValue(record?.launch_url);
 
   return {
     mode:
       record?.launch_mode === "iframe" || record?.launch_mode === "external"
         ? record.launch_mode
         : "none",
-    launchUrl:
-      (typeof record?.launch_url === "string" && record.launch_url.length > 0
-        ? record.launch_url
-        : `/registration?game=${slug}`) || undefined,
+    launchUrl: explicitLaunchUrl,
     demoUrl: demoSourceUrl ? `/game/${slug}/demo` : undefined,
     demoSourceUrl,
     launchLabel:
@@ -455,21 +561,17 @@ function buildLaunchConfig(
         ? record.launch_label
         : "Грати") || "Грати",
     demoLabel:
-      (typeof record?.demo_label === "string" && record.demo_label.length > 0
+      (typeof record?.demo_label === "string" &&
+      record.demo_label.length > 0 &&
+      !/slotcity/i.test(record.demo_label)
         ? record.demo_label
-        : demoSourceUrl === sourceUrl
-          ? FALLBACK_DEMO_SOURCE_LABEL
-          : "Демо") || "Демо",
+        : FALLBACK_DEMO_SOURCE_LABEL) || FALLBACK_DEMO_SOURCE_LABEL,
     requiresAuth: record?.requires_auth ?? true,
     openInNewTab: record?.open_in_new_tab ?? false,
     providerGameId:
-      typeof record?.provider_game_id === "string" && record.provider_game_id.length > 0
-        ? record.provider_game_id
-        : undefined,
+      normalizeLaunchValue(record?.provider_game_id),
     providerSlug:
-      typeof record?.provider_slug === "string" && record.provider_slug.length > 0
-        ? record.provider_slug
-        : undefined
+      normalizeLaunchValue(record?.provider_slug)
   };
 }
 
@@ -566,7 +668,7 @@ export async function getStorefrontGamePage(slugInput: string): Promise<Storefro
       (typeof record?.extracted_at === "string" && record.extracted_at.length > 0
         ? record.extracted_at
         : importedPage?.extractedAt) || undefined,
-    launch: buildLaunchConfig(slug, sourceUrl, record),
+    launch: await buildLaunchConfig(slug, name, sourceUrl, record),
     relatedGames: buildRelatedGames(slug, provider, explicitRelated, pool)
   };
 }

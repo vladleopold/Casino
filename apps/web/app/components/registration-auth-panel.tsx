@@ -45,26 +45,30 @@ export function RegistrationAuthPanel() {
 
     setIsSubmitting(true);
 
-    const result =
-      mode === "login"
-        ? await login({
-            email,
-            password
-          })
-        : await register({
-            email,
-            username,
-            password
-          });
+    try {
+      const result =
+        mode === "login"
+          ? await login({
+              email,
+              password
+            })
+          : await register({
+              email,
+              username,
+              password
+            });
 
-    setIsSubmitting(false);
+      if (!result.ok) {
+        setError(result.message ?? "Не вдалося завершити дію.");
+        return;
+      }
 
-    if (!result.ok) {
-      setError(result.message ?? "Не вдалося завершити дію.");
-      return;
+      router.push(resolveNextHref(searchParams) as Route);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Не вдалося завершити дію.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.push(resolveNextHref(searchParams) as Route);
   };
 
   return (
@@ -76,7 +80,7 @@ export function RegistrationAuthPanel() {
       <p>
         {mode === "login"
           ? "Використайте email і пароль. Після входу дії прив'язуються вже до реального користувача."
-          : "Користувач створюється в PostgreSQL storefront-auth storage. Після цього його можна бачити в операторському розділі та в Directus mirror."}
+          : "Користувач створюється в PostgreSQL storefront-auth storage. Після цього його можна бачити в кабінеті гравця та в Directus mirror."}
       </p>
 
       <label className="slotcity-registration-field">
@@ -143,20 +147,22 @@ export function RegistrationAuthPanel() {
       {hasGoogleAuth ? (
         <button
           type="button"
-          className="slotcity-auth-button slotcity-auth-button-secondary"
+          className="slotcity-auth-button slotcity-auth-button-google"
           onClick={() => {
             void loginWithGoogle(resolveNextHref(searchParams));
           }}
           disabled={isSubmitting}
         >
-          Увійти через Google
+          <span>Увійти через </span>
+          <span className="slotcity-auth-button-google-word">Google</span>
         </button>
       ) : null}
 
-      <div className="slotcity-registration-panel-meta">
-        <span>Оператори: `/operator/activity` і `/operator/users`</span>
-        {account && isAuthenticated ? <span>Поточний userId: {account.userId}</span> : null}
-      </div>
+      {account && isAuthenticated ? (
+        <div className="slotcity-registration-panel-meta">
+          <span>Поточний userId: {account.userId}</span>
+        </div>
+      ) : null}
     </aside>
   );
 }

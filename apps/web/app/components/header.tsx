@@ -98,6 +98,24 @@ export function Header({ onMenuClick, route = "home" }: HeaderProps) {
               <span className="slotcity-deposit-button-label">Поповнити</span>
               <span className="slotcity-deposit-button-short" aria-hidden="true">+</span>
             </TrackedButton>
+
+            <TrackedLink
+              href={"/my-city" as Route}
+              className="slotcity-cabinet-button"
+              event="cta_clicked"
+              payload={{
+                properties: {
+                  route,
+                  placement: "header_cabinet"
+                }
+              }}
+              aria-label="Моє сіті"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21a8 8 0 1 0-16 0" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </TrackedLink>
           </>
         ) : (
           <div className="slotcity-auth-guest-group">

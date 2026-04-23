@@ -14,12 +14,15 @@ import {
   signOut,
   useSession
 } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 import type { PlatformEvent } from "@slotcity/analytics-schema";
 
 import { useSlotcityAnalytics } from "./analytics-context";
 
 const SESSION_ACTIVITY_STORAGE_KEY = "slotcity.activity.session_started";
+const SESSION_SYNC_RETRIES = 4;
+const SESSION_SYNC_DELAY_MS = 250;
 
 export interface SlotcityAccount {
   userId: string;
@@ -43,16 +46,31 @@ interface LoginPayload {
   password: string;
 }
 
+interface DepositRequestPayload {
+  amount: number;
+  paymentMethod: string;
+  paymentProvider?: string;
+  payerName?: string;
+  payerEmail?: string;
+  payerPhone?: string;
+  notes?: string;
+}
+
 interface SlotcityAccountContextValue {
   account: SlotcityAccount | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
   hasGoogleAuth: boolean;
+  isDepositModalOpen: boolean;
   register: (payload: RegisterPayload) => Promise<{ ok: boolean; message?: string }>;
   login: (payload: LoginPayload) => Promise<{ ok: boolean; message?: string }>;
   loginWithGoogle: (callbackUrl?: string) => Promise<void>;
   logout: () => void;
   requestDeposit: (placement: string) => Promise<void>;
+  closeDepositModal: () => void;
+  submitDepositRequest: (
+    payload: DepositRequestPayload
+  ) => Promise<{ ok: boolean; message?: string; depositId?: string }>;
   trackGameLaunch: (input: {
     slug: string;
     provider?: string;
@@ -67,6 +85,7 @@ const SlotcityAccountContext = createContext<SlotcityAccountContextValue>({
   isAuthenticated: false,
   isHydrated: false,
   hasGoogleAuth: false,
+  isDepositModalOpen: false,
   async register() {
     return {
       ok: false,
@@ -82,6 +101,13 @@ const SlotcityAccountContext = createContext<SlotcityAccountContextValue>({
   async loginWithGoogle() {},
   logout() {},
   async requestDeposit() {},
+  closeDepositModal() {},
+  async submitDepositRequest() {
+    return {
+      ok: false,
+      message: "Deposit flow is not ready."
+    };
+  },
   async trackGameLaunch() {}
 });
 
@@ -112,11 +138,20 @@ function mapSessionAccount(
   };
 }
 
+function delay(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
 export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
   const { browserIds, capture, identify } = useSlotcityAnalytics();
   const { data: session, status, update } = useSession();
+  const pathname = usePathname();
   const [account, setAccount] = useState<SlotcityAccount | null>(null);
   const [hasGoogleAuth, setHasGoogleAuth] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [depositPlacement, setDepositPlacement] = useState("header_deposit");
   const isHydrated = status !== "loading";
 
   const emitServerEvent = async (
@@ -150,6 +185,29 @@ export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
         properties: input.properties
       })
     });
+  };
+
+  const runNonBlocking = (label: string, task: () => Promise<unknown>) => {
+    void task().catch((error) => {
+      console.error(`[slotcity-account] ${label} failed`, error);
+    });
+  };
+
+  const resolveSignedInAccount = async () => {
+    for (let attempt = 0; attempt < SESSION_SYNC_RETRIES; attempt += 1) {
+      const nextSession = await getSession();
+      const nextAccount = mapSessionAccount(nextSession);
+
+      if (nextAccount) {
+        return nextAccount;
+      }
+
+      if (attempt < SESSION_SYNC_RETRIES - 1) {
+        await delay(SESSION_SYNC_DELAY_MS);
+      }
+    }
+
+    return null;
   };
 
   useEffect(() => {
@@ -225,120 +283,153 @@ export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
     }
   }, [account, browserIds, capture, isHydrated]);
 
+  useEffect(() => {
+    setIsDepositModalOpen(false);
+  }, [pathname]);
+
   const register = async ({ email, password, username }: RegisterPayload) => {
-    await capture("registration_started", {
-      properties: {
-        route: "registration",
-        path: getCurrentRoute(),
-        method: "email"
-      }
-    });
-
-    const response = await fetch("/api/account/register", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        username
-      })
-    });
-
-    const payload = (await response.json().catch(() => null)) as
-      | {
-          ok?: boolean;
-          message?: string;
-          user?: SlotcityAccount;
-        }
-      | null;
-
-    if (!response.ok || !payload?.ok) {
-      return {
-        ok: false,
-        message: payload?.message ?? "Не вдалося створити користувача."
-      };
-    }
-
-    const signInResult = await signIn("credentials", {
-      redirect: false,
-      email,
-      password
-    });
-
-    if (!signInResult?.ok) {
-      return {
-        ok: false,
-        message: "Користувача створено, але автоматичний вхід не спрацював."
-      };
-    }
-
-    const nextSession = await getSession();
-    const nextAccount = mapSessionAccount(nextSession);
-
-    if (nextAccount) {
-      setAccount(nextAccount);
-      identify(nextAccount.userId, {
-        username: nextAccount.username,
-        account_status: nextAccount.status,
-        balance: nextAccount.balance
-      });
-
-      await emitServerEvent("registration_completed", {
-        userId: nextAccount.userId,
+    runNonBlocking("registration_started", async () => {
+      await capture("registration_started", {
         properties: {
           route: "registration",
           path: getCurrentRoute(),
-          method: "email",
-          username: nextAccount.username
+          method: "email"
         }
       });
-    }
+    });
 
-    return {
-      ok: true
-    };
+    try {
+      const response = await fetch("/api/account/register", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          username
+        })
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            message?: string;
+            user?: SlotcityAccount;
+          }
+        | null;
+
+      if (!response.ok || !payload?.ok) {
+        return {
+          ok: false,
+          message: payload?.message ?? "Не вдалося створити користувача."
+        };
+      }
+
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email,
+        password
+      });
+
+      if (!signInResult?.ok) {
+        return {
+          ok: false,
+          message: "Користувача створено, але автоматичний вхід не спрацював."
+        };
+      }
+
+      const nextAccount = await resolveSignedInAccount();
+
+      if (nextAccount) {
+        setAccount(nextAccount);
+
+        try {
+          identify(nextAccount.userId, {
+            username: nextAccount.username,
+            account_status: nextAccount.status,
+            balance: nextAccount.balance
+          });
+        } catch (error) {
+          console.error("[slotcity-account] identify after registration failed", error);
+        }
+
+        runNonBlocking("registration_completed", async () => {
+          await emitServerEvent("registration_completed", {
+            userId: nextAccount.userId,
+            properties: {
+              route: "registration",
+              path: getCurrentRoute(),
+              method: "email",
+              username: nextAccount.username
+            }
+          });
+        });
+      }
+
+      return {
+        ok: true
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message:
+          error instanceof Error ? error.message : "Не вдалося створити користувача."
+      };
+    }
   };
 
   const login = async ({ email, password }: LoginPayload) => {
-    const signInResult = await signIn("credentials", {
-      redirect: false,
-      email,
-      password
-    });
+    try {
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email,
+        password
+      });
 
-    if (!signInResult?.ok) {
+      if (!signInResult?.ok) {
+        return {
+          ok: false,
+          message: "Невірний email або пароль."
+        };
+      }
+
+      const nextAccount = await resolveSignedInAccount();
+
+      if (nextAccount) {
+        setAccount(nextAccount);
+
+        try {
+          identify(nextAccount.userId, {
+            username: nextAccount.username,
+            account_status: nextAccount.status,
+            balance: nextAccount.balance
+          });
+        } catch (error) {
+          console.error("[slotcity-account] identify after login failed", error);
+        }
+
+        runNonBlocking("return_visit", async () => {
+          await capture("return_visit", {
+            userId: nextAccount.userId,
+            properties: {
+              route: "registration",
+              path: getCurrentRoute(),
+              username: nextAccount.username
+            }
+          });
+        });
+      }
+
+      return {
+        ok: true
+      };
+    } catch (error) {
       return {
         ok: false,
-        message: "Невірний email або пароль."
+        message: error instanceof Error ? error.message : "Не вдалося увійти."
       };
     }
-
-    const nextSession = await getSession();
-    const nextAccount = mapSessionAccount(nextSession);
-
-    if (nextAccount) {
-      setAccount(nextAccount);
-      identify(nextAccount.userId, {
-        username: nextAccount.username,
-        account_status: nextAccount.status,
-        balance: nextAccount.balance
-      });
-
-      await capture("return_visit", {
-        userId: nextAccount.userId,
-        properties: {
-          route: "registration",
-          path: getCurrentRoute(),
-          username: nextAccount.username
-        }
-      });
-    }
-
-    return {
-      ok: true
-    };
   };
 
   const loginWithGoogle = async (callbackUrl?: string) => {
@@ -355,27 +446,33 @@ export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
   };
 
   const requestDeposit = async (placement: string) => {
+    if (!account) {
+      return;
+    }
+
+    setDepositPlacement(placement);
+    setIsDepositModalOpen(true);
+  };
+
+  const closeDepositModal = () => {
+    setIsDepositModalOpen(false);
+  };
+
+  const submitDepositRequest = async (requestPayload: DepositRequestPayload) => {
     if (!account || !browserIds) {
-      return;
-    }
-
-    const rawAmount = window.prompt("Сума поповнення", "500");
-
-    if (!rawAmount) {
-      return;
-    }
-
-    const amount = Number(rawAmount.replace(/[^\d.]/g, ""));
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return;
+      return {
+        ok: false,
+        message: "Користувач не авторизований."
+      };
     }
 
     await emitServerEvent("deposit_started", {
       properties: {
         route: "payments",
-        placement,
-        amount
+        placement: depositPlacement,
+        amount: requestPayload.amount,
+        payment_method: requestPayload.paymentMethod,
+        payment_provider: requestPayload.paymentProvider ?? "manual-review"
       }
     });
 
@@ -385,57 +482,60 @@ export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        amount
+        amount: requestPayload.amount,
+        paymentMethod: requestPayload.paymentMethod,
+        paymentProvider: requestPayload.paymentProvider,
+        payerName: requestPayload.payerName,
+        payerEmail: requestPayload.payerEmail,
+        payerPhone: requestPayload.payerPhone,
+        notes: requestPayload.notes
       })
     });
 
-    const payload = (await response.json().catch(() => null)) as
+    const responsePayload = (await response.json().catch(() => null)) as
       | {
           ok?: boolean;
-          user?: SlotcityAccount;
+          message?: string;
+          request?: {
+            depositId?: string;
+          };
         }
       | null;
 
-    if (!response.ok || !payload?.ok || !payload.user) {
+    if (!response.ok || !responsePayload?.ok || !responsePayload.request?.depositId) {
       await emitServerEvent("deposit_failed", {
         properties: {
           route: "payments",
-          placement,
-          amount
+          placement: depositPlacement,
+          amount: requestPayload.amount,
+          payment_method: requestPayload.paymentMethod
         }
       });
-      return;
+      return {
+        ok: false,
+        message: responsePayload?.message ?? "Не вдалося створити заявку на поповнення."
+      };
     }
 
-    setAccount(payload.user);
-    identify(payload.user.userId, {
-      username: payload.user.username,
-      account_status: payload.user.status,
-      balance: payload.user.balance
-    });
+    setIsDepositModalOpen(false);
 
-    await update({
-      user: {
-        ...session?.user,
-        id: payload.user.userId,
-        email: payload.user.email,
-        username: payload.user.username,
-        balance: payload.user.balance,
-        status: payload.user.status,
-        authProvider: payload.user.authProvider,
-        createdAt: payload.user.createdAt,
-        lastLoginAt: payload.user.lastLoginAt,
-        lastSeenAt: new Date().toISOString()
-      }
-    });
-
-    await emitServerEvent("deposit_succeeded", {
+    await emitServerEvent("cta_clicked", {
       properties: {
         route: "payments",
-        placement,
-        amount
+        placement: depositPlacement,
+        amount: requestPayload.amount,
+        payment_method: requestPayload.paymentMethod,
+        deposit_id: responsePayload.request.depositId,
+        state: "pending_review"
       }
     });
+
+    await update();
+
+    return {
+      ok: true,
+      depositId: responsePayload.request.depositId
+    };
   };
 
   const trackGameLaunch = async ({
@@ -483,11 +583,14 @@ export function SlotcityAccountProvider({ children }: { children: ReactNode }) {
         isAuthenticated: Boolean(account),
         isHydrated,
         hasGoogleAuth,
+        isDepositModalOpen,
         register,
         login,
         loginWithGoogle,
         logout,
         requestDeposit,
+        closeDepositModal,
+        submitDepositRequest,
         trackGameLaunch
       }}
     >

@@ -1,6 +1,11 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { getStorefrontGamePage } from "@slotcity/cms-sdk";
+import {
+  adaptDemoUrlForDevice,
+  getStorefrontGamePage,
+  inferDemoDeviceKind
+} from "@slotcity/cms-sdk";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +16,17 @@ export default async function GameDemoFramePage({
 }) {
   const { slug } = await params;
   const page = await getStorefrontGamePage(slug);
+  const deviceKind = inferDemoDeviceKind((await headers()).get("user-agent"));
+  const demoSourceUrl = adaptDemoUrlForDevice(page?.launch.demoSourceUrl, deviceKind);
 
-  if (!page?.launch.demoSourceUrl) {
+  if (!page?.launch.demoSourceUrl || !demoSourceUrl) {
     notFound();
   }
 
   return (
     <main className="slotcity-game-demo-frame">
       <iframe
-        src={page.launch.demoSourceUrl}
+        src={demoSourceUrl}
         title={`${page.name} demo`}
         loading="eager"
         allowFullScreen

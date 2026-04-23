@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-import type { StorefrontGameLaunchContent } from "@slotcity/cms-sdk";
+import { adaptDemoUrlForDevice, type StorefrontGameLaunchContent } from "@slotcity/cms-sdk";
 
 import { useSlotcityAccount } from "./account-context";
 import { TrackedButton } from "./tracked-button";
@@ -29,12 +29,94 @@ export function GameLauncher({
   const [isDemoLoaded, setIsDemoLoaded] = useState(false);
   const [hasAutoExpanded, setHasAutoExpanded] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
-  const realHref = isAuthenticated ? launch.launchUrl || `/game/${slug}` : `/registration?game=${slug}`;
-  const demoHref = launch.demoUrl;
-  const demoEmbedSrc = launch.demoSourceUrl;
+  const [resolvedDemoSourceUrl, setResolvedDemoSourceUrl] = useState(launch.demoSourceUrl);
+  const [isResolvingDemo, setIsResolvingDemo] = useState(false);
+  const resolverBaseHref = `/api/games/demo?slug=${encodeURIComponent(slug)}&name=${encodeURIComponent(
+    title
+  )}`;
+  const resolverRedirectHref = `${resolverBaseHref}&redirect=1`;
+  const demoHref = resolvedDemoSourceUrl || launch.demoUrl || resolverRedirectHref;
+  const demoEmbedSrc = resolvedDemoSourceUrl || launch.demoSourceUrl;
   const canEmbedDemo = Boolean(demoEmbedSrc);
+  const hasRealLaunch = Boolean(launch.launchUrl);
+  const requiresRegistrationGate = hasRealLaunch && launch.requiresAuth && !isAuthenticated;
   const externalTarget = launch.openInNewTab || launch.mode === "external" ? "_blank" : undefined;
   const externalRel = externalTarget === "_blank" ? "noreferrer" : undefined;
+  const primaryHref = requiresRegistrationGate
+    ? `/registration?game=${slug}`
+    : hasRealLaunch
+      ? launch.launchUrl || `/game/${slug}`
+      : demoHref || `/registration?game=${slug}`;
+  const primaryLabel = hasRealLaunch ? launch.launchLabel : demoHref ? "Відкрити демо" : launch.launchLabel;
+  const primaryMode = hasRealLaunch ? "real" : demoHref ? "demo" : "real";
+  const primaryPlacement = hasRealLaunch
+    ? "game_launcher_real"
+    : demoHref
+      ? "game_launcher_demo_fallback"
+      : "game_launcher_registration_fallback";
+  const primaryTarget = hasRealLaunch && !requiresRegistrationGate ? externalTarget : undefined;
+  const primaryRel = hasRealLaunch && !requiresRegistrationGate ? externalRel : undefined;
+  const primarySuccess = hasRealLaunch
+    ? !requiresRegistrationGate
+    : Boolean(demoHref || demoEmbedSrc);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const isMobileDevice =
+      window.innerWidth < 768 ||
+      /android|iphone|ipad|ipod|mobile|iemobile|opera mini/i.test(window.navigator.userAgent);
+
+    if (!isMobileDevice) {
+      return;
+    }
+
+    const mobileDemoSourceUrl = adaptDemoUrlForDevice(launch.demoSourceUrl, "mobile");
+
+    if (mobileDemoSourceUrl) {
+      setResolvedDemoSourceUrl(mobileDemoSourceUrl);
+    }
+  }, [launch.demoSourceUrl]);
+
+  useEffect(() => {
+    if (launch.demoSourceUrl || resolvedDemoSourceUrl || typeof window === "undefined") {
+      return;
+    }
+
+    let isActive = true;
+    setIsResolvingDemo(true);
+
+    void fetch(resolverBaseHref, {
+      cache: "no-store"
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+
+        const payload = (await response.json()) as {
+          demoSourceUrl?: string;
+        };
+
+        if (isActive && payload.demoSourceUrl) {
+          setResolvedDemoSourceUrl(payload.demoSourceUrl);
+        }
+
+        return null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (isActive) {
+          setIsResolvingDemo(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [launch.demoSourceUrl, resolvedDemoSourceUrl, resolverBaseHref]);
 
   useEffect(() => {
     if (!canEmbedDemo || !isDemoLoaded || hasAutoExpanded || typeof window === "undefined") {
@@ -119,9 +201,13 @@ export function GameLauncher({
               <span className="slotcity-section-kicker">{provider || "SlotCity"}</span>
               <strong>{title}</strong>
               <p>
-                {demoHref
-                  ? "Демо вже доступне через кнопку нижче. Реальний launcher також можна підключити в Directus."
-                  : "Підключіть demo URL або real-money launcher у Directus, і ця зона почне відкривати гру прямо на сторінці."}
+                {canEmbedDemo
+                  ? "Демо вже доступне прямо на сторінці. Реальний launcher також можна підключити в Directus."
+                  : isResolvingDemo
+                    ? "Підключаємо demo launcher. Зачекайте кілька секунд, і гра відкриється прямо на сторінці."
+                    : demoHref
+                      ? "Демо вже доступне через кнопку нижче. Реальний launcher також можна підключити в Directus."
+                      : "Підключіть demo URL або real-money launcher у Directus, і ця зона почне відкривати гру прямо на сторінці."}
               </p>
             </div>
           </div>
@@ -130,30 +216,30 @@ export function GameLauncher({
 
       <div className="slotcity-game-launcher-actions">
         <TrackedLink
-          href={realHref}
+          href={primaryHref}
           className="slotcity-cta slotcity-cta-primary"
           onClick={() => {
             void trackGameLaunch({
               slug,
               provider,
-              mode: "real",
-              targetUrl: realHref,
-              success: isAuthenticated || Boolean(launch.launchUrl)
+              mode: primaryMode,
+              targetUrl: primaryHref,
+              success: primarySuccess
             });
           }}
           event="cta_clicked"
           payload={{
             properties: {
               route: "game",
-              placement: "game_launcher_real",
+              placement: primaryPlacement,
               slug,
-              label: launch.launchLabel
+              label: primaryLabel
             }
           }}
-          target={externalTarget}
-          rel={externalRel}
+          target={primaryTarget}
+          rel={primaryRel}
         >
-          {launch.launchLabel}
+          {primaryLabel}
         </TrackedLink>
         {canEmbedDemo ? (
           <TrackedButton

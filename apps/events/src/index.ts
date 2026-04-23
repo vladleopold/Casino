@@ -16,14 +16,25 @@ import {
   recordActivityEvent
 } from "./activity-store.js";
 import {
+  approveDepositRequest,
   createCredentialUser,
+  createDepositRequest,
+  getFinanceAdminUserByEmail,
+  getFinanceOverview,
+  listFinanceAdminUsers,
   getStorefrontUserByEmail,
+  getStorefrontUserFinanceProfile,
   getStorefrontUserById,
   incrementUserBalance,
+  listDepositRequests,
+  listLedgerEntries,
   listStorefrontUsers,
+  rejectDepositRequest,
   touchUserSeen,
+  upsertFinanceAdminUser,
   upsertGoogleUser,
-  verifyCredentialUser
+  verifyCredentialUser,
+  removeFinanceAdminUser
 } from "./storefront-auth.js";
 
 const app = Fastify({
@@ -94,6 +105,38 @@ const googleUpsertSchema = z.object({
 
 const depositSchema = z.object({
   amount: z.number().positive().max(1_000_000)
+});
+
+const depositRequestSchema = z.object({
+  userId: z.string().min(1),
+  amount: z.number().positive().max(1_000_000),
+  paymentMethod: z.string().min(2).max(64),
+  paymentProvider: z.string().min(2).max(64).optional(),
+  payerName: z.string().min(2).max(128).optional(),
+  payerEmail: z.string().email().optional(),
+  payerPhone: z.string().min(5).max(32).optional(),
+  notes: z.string().max(500).optional(),
+  idempotencyKey: z.string().min(6).max(128).optional()
+});
+
+const approveDepositSchema = z.object({
+  approvedBy: z.string().min(1).max(128).optional().nullable()
+});
+
+const rejectDepositSchema = z.object({
+  rejectedBy: z.string().min(1).max(128).optional().nullable(),
+  reason: z.string().min(2).max(500).optional().nullable()
+});
+
+const financeAdminUpsertSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["super_admin", "admin"]).optional(),
+  createdBy: z.string().min(1).max(128).optional().nullable()
+});
+
+const financeAdminRemoveSchema = z.object({
+  email: z.string().email(),
+  removedBy: z.string().min(1).max(128).optional().nullable()
 });
 
 function getDistinctId(payload: PlatformEvent) {
@@ -329,6 +372,104 @@ app.get("/auth/users", async (request, reply) => {
   });
 });
 
+app.get("/auth/finance-admin-users", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const admins = await listFinanceAdminUsers();
+  return reply.send({
+    admins
+  });
+});
+
+app.get("/auth/finance-admin-users/by-email/:email", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    email: string;
+  };
+  const admin = await getFinanceAdminUserByEmail(params.email);
+
+  if (!admin) {
+    return reply.code(404).send({
+      error: "finance_admin_not_found"
+    });
+  }
+
+  return reply.send({
+    admin
+  });
+});
+
+app.post("/auth/finance-admin-users", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const parsed = financeAdminUpsertSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректна Google-пошта або роль адміністратора."
+    });
+  }
+
+  try {
+    const admin = await upsertFinanceAdminUser(parsed.data);
+    return reply.send({
+      ok: true,
+      admin
+    });
+  } catch (error) {
+    return reply.code(400).send({
+      error: "finance_admin_upsert_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося оновити admin allowlist."
+    });
+  }
+});
+
+app.delete("/auth/finance-admin-users", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const parsed = financeAdminRemoveSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректна Google-пошта адміністратора."
+    });
+  }
+
+  try {
+    const admin = await removeFinanceAdminUser(parsed.data);
+    return reply.send({
+      ok: true,
+      admin
+    });
+  } catch (error) {
+    return reply.code(400).send({
+      error: "finance_admin_remove_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося видалити Google-пошту з allowlist."
+    });
+  }
+});
+
 app.get("/auth/users/by-email/:email", async (request, reply) => {
   if (!hasAuthServiceAccess(request.headers)) {
     return reply.code(401).send({
@@ -434,6 +575,201 @@ app.post("/auth/users/:userId/deposit", async (request, reply) => {
   return reply.send({
     ok: true,
     user
+  });
+});
+
+app.get("/auth/users/:userId/finance", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    userId: string;
+  };
+  const profile = await getStorefrontUserFinanceProfile(params.userId);
+
+  if (!profile) {
+    return reply.code(404).send({
+      error: "user_not_found"
+    });
+  }
+
+  return reply.send({
+    profile
+  });
+});
+
+app.post("/auth/deposit-requests", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const parsed = depositRequestSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректні дані запиту на поповнення."
+    });
+  }
+
+  try {
+    const depositRequest = await createDepositRequest(parsed.data);
+    return reply.send({
+      ok: true,
+      request: depositRequest
+    });
+  } catch (error) {
+    return reply.code(400).send({
+      error: "deposit_request_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося створити заявку на поповнення."
+    });
+  }
+});
+
+app.get("/auth/deposit-requests", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const query = request.query as {
+    limit?: string;
+    status?: "pending" | "approved" | "rejected" | "cancelled" | "all";
+    userId?: string;
+  };
+
+  const requests = await listDepositRequests({
+    limit: query.limit ? Number(query.limit) : undefined,
+    status: query.status,
+    userId: query.userId
+  });
+
+  return reply.send({
+    requests
+  });
+});
+
+app.post("/auth/deposit-requests/:depositId/approve", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    depositId: string;
+  };
+  const parsed = approveDepositSchema.safeParse(request.body ?? {});
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректні дані approve-запиту."
+    });
+  }
+
+  try {
+    const result = await approveDepositRequest({
+      depositId: params.depositId,
+      approvedBy: parsed.data.approvedBy ?? null
+    });
+
+    return reply.send({
+      ok: true,
+      request: result.request,
+      user: result.user,
+      entry: result.entry
+    });
+  } catch (error) {
+    return reply.code(
+      error instanceof Error && error.message === "deposit_not_found" ? 404 : 400
+    ).send({
+      error: "approve_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося підтвердити поповнення."
+    });
+  }
+});
+
+app.post("/auth/deposit-requests/:depositId/reject", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    depositId: string;
+  };
+  const parsed = rejectDepositSchema.safeParse(request.body ?? {});
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректні дані reject-запиту."
+    });
+  }
+
+  try {
+    const depositRequest = await rejectDepositRequest({
+      depositId: params.depositId,
+      rejectedBy: parsed.data.rejectedBy ?? null,
+      reason: parsed.data.reason ?? null
+    });
+
+    return reply.send({
+      ok: true,
+      request: depositRequest
+    });
+  } catch (error) {
+    return reply.code(400).send({
+      error: "reject_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося відхилити поповнення."
+    });
+  }
+});
+
+app.get("/auth/ledger", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const query = request.query as {
+    limit?: string;
+    userId?: string;
+  };
+
+  const entries = await listLedgerEntries({
+    limit: query.limit ? Number(query.limit) : undefined,
+    userId: query.userId
+  });
+
+  return reply.send({
+    entries
+  });
+});
+
+app.get("/auth/stats", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const overview = await getFinanceOverview();
+
+  return reply.send({
+    overview
   });
 });
 

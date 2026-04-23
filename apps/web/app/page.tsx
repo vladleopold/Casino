@@ -6,23 +6,12 @@ import { Reveal } from "./components/reveal";
 import { TrackedButton } from "./components/tracked-button";
 import { TrackedGameCard } from "./components/tracked-game-card";
 import { TrackedLink } from "./components/tracked-link";
-import { TrackedScroller } from "./components/tracked-scroller";
 import { LayoutShell } from "./components/layout-shell";
 import { MobileDock } from "./components/mobile-dock";
 import { PromotionSlider } from "./components/PromotionSlider";
 import { HeroSlider } from "./components/hero-slider";
 import { SideRail } from "./components/side-rail";
-
-function MiniGamePill({ title, image }: { title: string; image: string }) {
-  return (
-    <div className="slotcity-mini-pill">
-      <div className="slotcity-mini-pill-media">
-        <Image src={image} alt={title} fill sizes="64px" />
-      </div>
-      <span>{title}</span>
-    </div>
-  );
-}
+import { TopIconCarousel } from "./components/top-icon-carousel";
 
 function HeroDots() {
   return (
@@ -289,16 +278,14 @@ export default async function HomePage() {
           }
         }}
       >
-        <TrackedScroller
-          className="slotcity-mini-shelf-track"
-          payload={{
-            shelfId: "home_quick_picks"
-          }}
-        >
-          {quickPicks.map((game) => (
-            <MiniGamePill key={game.id} title={game.title} image={game.image} />
-          ))}
-        </TrackedScroller>
+        <TopIconCarousel
+          items={monthlyTop.slice(0, 10).map((game, index) => ({
+            id: game.id,
+            title: game.title,
+            image: game.image,
+            rank: game.rank ?? String(index + 1)
+          }))}
+        />
       </Reveal>
 
       <Reveal
