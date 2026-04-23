@@ -1,11 +1,15 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+
+import { getPublicSiteUrl } from "../../lib/site-urls";
 
 export function FinanceOpsLogin() {
   const searchParams = useSearchParams();
   const hasAccessError = searchParams.get("error") === "access_denied";
+  const bridgeUrl = `${getPublicSiteUrl()}/ops/google/start?next=${encodeURIComponent(
+    "/operator/payments"
+  )}`;
 
   return (
     <main className="slotcity-wallet-login-shell">
@@ -27,9 +31,7 @@ export function FinanceOpsLogin() {
           type="button"
           className="slotcity-auth-button slotcity-auth-button-google slotcity-auth-button-google-ops"
           onClick={() => {
-            void signIn("google", {
-              callbackUrl: "/operator/payments"
-            });
+            window.location.assign(bridgeUrl);
           }}
         >
           <span>Увійти через </span>

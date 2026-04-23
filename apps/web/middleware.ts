@@ -7,6 +7,7 @@ function isAllowedOpsPath(pathname: string) {
   return (
     pathname === "/login" ||
     pathname.startsWith("/operator") ||
+    pathname.startsWith("/api/ops") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/operator") ||
     pathname.startsWith("/_next") ||

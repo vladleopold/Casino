@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
 import { isOpsApp } from "../../../../../../lib/app-kind";
-import { authOptions } from "../../../../../../lib/auth/options";
-import { hasFinanceAdminAccess } from "../../../../../../lib/auth/finance-admin";
+import { getOpsAdminSession } from "../../../../../../lib/auth/ops-session";
 import { rejectDepositRequest } from "../../../../../../lib/auth/store-users";
 
 export const runtime = "nodejs";
@@ -33,9 +31,9 @@ export async function POST(
     );
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await getOpsAdminSession();
 
-  if (!session?.user?.id) {
+  if (!session?.adminId) {
     return NextResponse.json(
       {
         ok: false,
@@ -47,18 +45,6 @@ export async function POST(
     );
   }
 
-  if (!(await hasFinanceAdminAccess(session.user.email))) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "Forbidden"
-      },
-      {
-        status: 403
-      }
-    );
-  }
-
   const payload = await request.json().catch(() => null);
   const parsed = rejectSchema.safeParse(payload ?? {});
   const { depositId } = await context.params;
@@ -66,7 +52,7 @@ export async function POST(
   try {
     const result = await rejectDepositRequest({
       depositId,
-      rejectedBy: session.user.email ?? session.user.username,
+      rejectedBy: session.email,
       reason: parsed.success ? parsed.data.reason : undefined
     });
 

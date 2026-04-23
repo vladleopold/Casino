@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
 import { isOpsApp } from "../../../../../../lib/app-kind";
-import { authOptions } from "../../../../../../lib/auth/options";
-import { hasFinanceAdminAccess } from "../../../../../../lib/auth/finance-admin";
+import { getOpsAdminSession } from "../../../../../../lib/auth/ops-session";
 import { approveDepositRequest } from "../../../../../../lib/auth/store-users";
 
 export const runtime = "nodejs";
@@ -28,9 +26,9 @@ export async function POST(
     );
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await getOpsAdminSession();
 
-  if (!session?.user?.id) {
+  if (!session?.adminId) {
     return NextResponse.json(
       {
         ok: false,
@@ -42,24 +40,12 @@ export async function POST(
     );
   }
 
-  if (!(await hasFinanceAdminAccess(session.user.email))) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "Forbidden"
-      },
-      {
-        status: 403
-      }
-    );
-  }
-
   const { depositId } = await context.params;
 
   try {
     const result = await approveDepositRequest({
       depositId,
-      approvedBy: session.user.email ?? session.user.username
+      approvedBy: session.email
     });
 
     return NextResponse.json({

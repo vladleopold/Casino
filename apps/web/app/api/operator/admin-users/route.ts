@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
 import { isOpsApp } from "../../../../lib/app-kind";
-import { authOptions } from "../../../../lib/auth/options";
 import {
   addFinanceAdminUser,
-  hasFinanceAdminAccess,
   listFinanceAdminUsers,
   removeFinanceAdminUser
 } from "../../../../lib/auth/finance-admin";
+import { getOpsAdminSession } from "../../../../lib/auth/ops-session";
 
 export const runtime = "nodejs";
 
@@ -35,9 +33,9 @@ async function authorizeOperator() {
     );
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await getOpsAdminSession();
 
-  if (!session?.user?.email) {
+  if (!session?.email) {
     return NextResponse.json(
       {
         ok: false,
@@ -45,18 +43,6 @@ async function authorizeOperator() {
       },
       {
         status: 401
-      }
-    );
-  }
-
-  if (!(await hasFinanceAdminAccess(session.user.email))) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "Forbidden"
-      },
-      {
-        status: 403
       }
     );
   }
@@ -103,7 +89,7 @@ export async function POST(request: Request) {
   const admin = await addFinanceAdminUser({
     email: parsed.data.email,
     role: parsed.data.role ?? "admin",
-    createdBy: auth.user.email
+    createdBy: auth.email
   });
 
   return NextResponse.json({
@@ -136,7 +122,7 @@ export async function DELETE(request: Request) {
 
   await removeFinanceAdminUser({
     email: parsed.data.email,
-    removedBy: auth.user.email
+    removedBy: auth.email
   });
 
   return NextResponse.json({

@@ -1,10 +1,10 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
+import { WithdrawalsDashboard } from "../../components/withdrawals-dashboard";
 import { isOpsApp } from "../../../lib/app-kind";
 import { getOpsAdminSession } from "../../../lib/auth/ops-session";
-import { FinanceAdminUsersPanel } from "../../components/finance-admin-users-panel";
 
-export default async function OperatorUsersPage() {
+export default async function OperatorWithdrawalsPage() {
   if (!isOpsApp()) {
     notFound();
   }
@@ -16,7 +16,7 @@ export default async function OperatorUsersPage() {
   }
 
   return (
-    <FinanceAdminUsersPanel
+    <WithdrawalsDashboard
       operator={{
         email: session.email,
         role: session.role

@@ -16,7 +16,7 @@ function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
-function getFallbackAdmins() {
+function getFallbackAdmins(): FinanceAdminUser[] {
   const raw = process.env.FINANCE_ADMIN_EMAILS?.trim();
   const emails = raw
     ? raw
@@ -28,7 +28,9 @@ function getFallbackAdmins() {
   return Array.from(new Set(emails)).map((email, index) => ({
     adminId: `fallback_${index + 1}`,
     email,
-    role: email === DEFAULT_FINANCE_SUPER_ADMIN_EMAIL ? "super_admin" : "admin",
+    role: (email === DEFAULT_FINANCE_SUPER_ADMIN_EMAIL ? "super_admin" : "admin") as
+      | "super_admin"
+      | "admin",
     status: "active" as const,
     createdAt: new Date(0).toISOString(),
     updatedAt: new Date(0).toISOString(),

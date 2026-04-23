@@ -2,9 +2,9 @@ import { redirect, notFound } from "next/navigation";
 
 import { isOpsApp } from "../../../lib/app-kind";
 import { getOpsAdminSession } from "../../../lib/auth/ops-session";
-import { FinanceAdminUsersPanel } from "../../components/finance-admin-users-panel";
+import GamesDashboard from "../../components/games-dashboard";
 
-export default async function OperatorUsersPage() {
+export default async function OperatorGamesPage() {
   if (!isOpsApp()) {
     notFound();
   }
@@ -16,7 +16,7 @@ export default async function OperatorUsersPage() {
   }
 
   return (
-    <FinanceAdminUsersPanel
+    <GamesDashboard
       operator={{
         email: session.email,
         role: session.role

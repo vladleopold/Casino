@@ -1,9 +1,7 @@
 import { redirect, notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 
 import { isOpsApp } from "../../../lib/app-kind";
-import { authOptions } from "../../../lib/auth/options";
-import { hasFinanceAdminAccess } from "../../../lib/auth/finance-admin";
+import { getOpsAdminSession } from "../../../lib/auth/ops-session";
 import { PaymentsDashboard } from "../../components/payments-dashboard";
 
 export default async function OperatorPaymentsPage() {
@@ -11,15 +9,18 @@ export default async function OperatorPaymentsPage() {
     notFound();
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await getOpsAdminSession();
 
-  if (!session?.user?.email) {
+  if (!session?.email) {
     redirect("/login");
   }
 
-  if (!(await hasFinanceAdminAccess(session.user.email))) {
-    redirect("/login?error=access_denied");
-  }
-
-  return <PaymentsDashboard />;
+  return (
+    <PaymentsDashboard
+      operator={{
+        email: session.email,
+        role: session.role
+      }}
+    />
+  );
 }

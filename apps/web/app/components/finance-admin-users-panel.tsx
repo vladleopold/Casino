@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { FinanceOpsSidebar } from "./finance-ops-sidebar";
 
 type FinanceAdminUser = {
   adminId: string;
@@ -20,8 +20,14 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export function FinanceAdminUsersPanel() {
-  const { data: session } = useSession();
+export function FinanceAdminUsersPanel({
+  operator
+}: {
+  operator: {
+    email: string;
+    role: "super_admin" | "admin";
+  };
+}) {
   const [admins, setAdmins] = useState<FinanceAdminUser[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<FinanceAdminUser["role"]>("admin");
@@ -126,50 +132,7 @@ export function FinanceAdminUsersPanel() {
 
   return (
     <section className="slotcity-wallet-shell">
-      <aside className="slotcity-wallet-sidebar">
-        <div className="slotcity-wallet-brand">
-          <strong>CASINO</strong>
-          <span>OPS</span>
-        </div>
-
-        <nav className="slotcity-wallet-nav">
-          <a href="/operator/payments" className="slotcity-wallet-nav-item">
-            <i>₴</i>
-            <span>Payments</span>
-          </a>
-          <a href="/operator/users" className="slotcity-wallet-nav-item is-active">
-            <i>◎</i>
-            <span>Admin Access</span>
-          </a>
-        </nav>
-
-        <div className="slotcity-wallet-support">
-          <strong>Google-only auth</strong>
-          <span>Allowlist enforced</span>
-        </div>
-
-        <div className="slotcity-wallet-admin">
-          <div className="slotcity-wallet-admin-avatar">
-            {(session?.user?.email?.slice(0, 1) || "A").toUpperCase()}
-          </div>
-          <div>
-            <strong>{session?.user?.email ?? "Admin"}</strong>
-            <span>{session?.user?.status ?? "admin"}</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className="slotcity-cta slotcity-cta-secondary"
-          onClick={() => {
-            void signOut({
-              callbackUrl: "/login"
-            });
-          }}
-        >
-          Вийти
-        </button>
-      </aside>
+      <FinanceOpsSidebar operator={operator} active="users" />
 
       <div className="slotcity-wallet-main">
         <header className="slotcity-wallet-topbar">

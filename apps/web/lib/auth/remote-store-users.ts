@@ -139,13 +139,44 @@ export async function upsertRemoteGoogleUser(input: {
   return payload.user;
 }
 
-export async function incrementRemoteUserBalance(input: { userId: string; amount: number }) {
+export async function incrementRemoteUserBalance(input: {
+  userId: string;
+  amount: number;
+  note?: string | null;
+  createdBy?: string | null;
+}) {
   const payload = await authRequest<{ user?: StorefrontUser | null }>(
-    `/users/${encodeURIComponent(input.userId)}/deposit`,
+    `/users/${encodeURIComponent(input.userId)}/manual-credit`,
     {
       method: "POST",
       body: {
-        amount: input.amount
+        amount: input.amount,
+        note: input.note ?? null,
+        createdBy: input.createdBy ?? null
+      },
+      service: true
+    }
+  );
+
+  return payload.user ?? null;
+}
+
+export async function updateRemoteStorefrontUserAdminState(input: {
+  userId: string;
+  status?: "active" | "blocked";
+  isVip?: boolean;
+  password?: string | null;
+  updatedBy?: string | null;
+}) {
+  const payload = await authRequest<{ user?: StorefrontUser | null }>(
+    `/users/${encodeURIComponent(input.userId)}/admin-state`,
+    {
+      method: "POST",
+      body: {
+        status: input.status,
+        isVip: input.isVip,
+        password: input.password ?? undefined,
+        updatedBy: input.updatedBy ?? null
       },
       service: true
     }

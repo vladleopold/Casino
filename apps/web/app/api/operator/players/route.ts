@@ -2,16 +2,11 @@ import { NextResponse } from "next/server";
 
 import { isOpsApp } from "../../../../lib/app-kind";
 import { getOpsAdminSession } from "../../../../lib/auth/ops-session";
-import {
-  getFinanceOverview,
-  listStorefrontUsersForAdmin,
-  listDepositRequestsForAdmin,
-  listLedgerEntriesForAdmin
-} from "../../../../lib/auth/store-users";
+import { listStorefrontUsersForAdmin } from "../../../../lib/auth/store-users";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
+async function authorizeOperator() {
   if (!isOpsApp()) {
     return NextResponse.json(
       {
@@ -26,7 +21,7 @@ export async function GET(request: Request) {
 
   const session = await getOpsAdminSession();
 
-  if (!session?.adminId) {
+  if (!session?.email) {
     return NextResponse.json(
       {
         ok: false,
@@ -38,27 +33,23 @@ export async function GET(request: Request) {
     );
   }
 
+  return session;
+}
+
+export async function GET(request: Request) {
+  const auth = await authorizeOperator();
+
+  if (auth instanceof NextResponse) {
+    return auth;
+  }
+
   try {
     const url = new URL(request.url);
-    const limit = Number(url.searchParams.get("limit") ?? "240");
-
-    const [overview, requests, ledger, users] = await Promise.all([
-      getFinanceOverview(),
-      listDepositRequestsForAdmin({
-        limit,
-        status: "all"
-      }),
-      listLedgerEntriesForAdmin({
-        limit: 180
-      }),
-      listStorefrontUsersForAdmin(500)
-    ]);
+    const limit = Number(url.searchParams.get("limit") ?? "500");
+    const users = await listStorefrontUsersForAdmin(limit);
 
     return NextResponse.json({
       ok: true,
-      overview,
-      requests,
-      ledger,
       users
     });
   } catch (error) {
@@ -68,7 +59,7 @@ export async function GET(request: Request) {
         message:
           error instanceof Error
             ? error.message
-            : "Не вдалося завантажити фінансову адмінку."
+            : "Не вдалося завантажити список гравців."
       },
       {
         status: 503

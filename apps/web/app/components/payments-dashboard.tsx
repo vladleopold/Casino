@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { DraggableCard } from "./draggable-card";
+import { FinanceOpsSidebar } from "./finance-ops-sidebar";
+import { useDashboardLayout } from "../hooks/useDashboardLayout";
 
 interface FinanceOverview {
   userCount: number;
@@ -50,6 +65,8 @@ interface StorefrontUser {
   displayName: string;
   authProvider: string;
   balance: number;
+  status: "active" | "blocked";
+  isVip: boolean;
   createdAt: string;
   lastLoginAt?: string | null;
   lastSeenAt?: string | null;
@@ -253,6 +270,10 @@ function isBonusEntry(entry: LedgerEntry) {
 
 function isWithdrawalEntry(entry: LedgerEntry) {
   return /withdraw|cashout|payout_request/i.test(entry.entryType);
+}
+
+function isManualCreditEntry(entry: LedgerEntry) {
+  return /manual_credit|operator_credit/i.test(entry.entryType);
 }
 
 function ChartHeader({
@@ -546,8 +567,14 @@ function MetricCard({
   );
 }
 
-export function PaymentsDashboard() {
-  const { data: session } = useSession();
+export function PaymentsDashboard({
+  operator
+}: {
+  operator: {
+    email: string;
+    role: "super_admin" | "admin";
+  };
+}) {
   const [overview, setOverview] = useState<FinanceOverview | null>(null);
   const [requests, setRequests] = useState<DepositRequest[]>([]);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
@@ -560,6 +587,7 @@ export function PaymentsDashboard() {
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [serverTime, setServerTime] = useState(() => new Date());
 
+  const { layout, resetLayout, moveCard, reorderCards } = useDashboardLayout();
   const dayPoints = useMemo(() => buildDayPoints(CHART_DAYS), []);
 
   const load = async () => {
@@ -641,6 +669,17 @@ export function PaymentsDashboard() {
       sumForDay(
         dayPoints,
         ledger.filter(isWithdrawalEntry),
+        (entry) => entry.createdAt,
+        (entry) => entry.amount
+      ),
+    [dayPoints, ledger]
+  );
+
+  const manualCreditSeries = useMemo(
+    () =>
+      sumForDay(
+        dayPoints,
+        ledger.filter(isManualCreditEntry),
         (entry) => entry.createdAt,
         (entry) => entry.amount
       ),
@@ -1024,25 +1063,6 @@ export function PaymentsDashboard() {
       .slice(0, 5);
   }, [requests]);
 
-  const sidebarItems = useMemo(
-    () => [
-      { label: "Dashboard", icon: "⌂", href: "#" },
-      { label: "Live Activity", icon: "⌁", href: "#" },
-      { label: "Admin Access", icon: "◎", href: "/operator/users" },
-      { label: "Transactions", icon: "⇄", href: "#" },
-      { label: "Risk Monitor", icon: "△", href: "#" },
-      { label: "Bonuses", icon: "⎔", href: "#" },
-      { label: "Payments", icon: "₴", href: "/operator/payments" },
-      { label: "Games", icon: "◫", href: "#" },
-      { label: "KYC", icon: "✓", href: "#" },
-      { label: "Affiliates", icon: "◎", href: "#" },
-      { label: "Reports", icon: "▤", href: "#" },
-      { label: "Settings", icon: "⚙", href: "#" },
-      { label: "Logs", icon: "☰", href: "#" }
-    ],
-    []
-  );
-
   const topEvents = useMemo(
     () =>
       [...liveFeed]
@@ -1136,54 +1156,53 @@ export function PaymentsDashboard() {
     }
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  const findColumnKey = (cardId: string) =>
+    Object.entries(layout).find(([, cards]) => cards.some((card) => card.id === cardId))?.[0] ??
+    null;
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    const activeColumnKey = findColumnKey(activeId);
+    const overColumnKey = findColumnKey(overId);
+
+    if (!activeColumnKey || !overColumnKey) {
+      return;
+    }
+
+    if (activeColumnKey === overColumnKey) {
+      const activeIndex = layout[activeColumnKey]?.findIndex(
+        (card) => card.id === activeId
+      ) ?? 0;
+      const overIndex = layout[overColumnKey]?.findIndex(
+        (card) => card.id === overId
+      ) ?? 0;
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        reorderCards(activeColumnKey, activeIndex, overIndex);
+      }
+      return;
+    }
+
+    const overIndex =
+      layout[overColumnKey]?.findIndex((card) => card.id === overId) ?? 0;
+    moveCard(activeId, activeColumnKey, overColumnKey, overIndex);
+  };
+
   return (
     <section className="slotcity-wallet-shell">
-      <aside className="slotcity-wallet-sidebar">
-        <div className="slotcity-wallet-brand">
-          <strong>CASINO</strong>
-          <span>OPS</span>
-        </div>
-
-        <nav className="slotcity-wallet-nav">
-          {sidebarItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className={`slotcity-wallet-nav-item${item.label === "Dashboard" ? " is-active" : ""}`}
-            >
-              <i>{item.icon}</i>
-              <span>{item.label}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="slotcity-wallet-support">
-          <strong>Support Chat</strong>
-          <span>12 online</span>
-        </div>
-
-        <div className="slotcity-wallet-admin">
-          <div className="slotcity-wallet-admin-avatar">
-            {(session?.user?.email?.slice(0, 1) || "A").toUpperCase()}
-          </div>
-          <div>
-            <strong>{session?.user?.email ?? "Admin"}</strong>
-            <span>{session?.user?.status ?? "Super Admin"}</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className="slotcity-cta slotcity-cta-secondary"
-          onClick={() => {
-            void signOut({
-              callbackUrl: "/login"
-            });
-          }}
-        >
-          Вийти
-        </button>
-      </aside>
+      <FinanceOpsSidebar operator={operator} active="payments" />
 
       <div className="slotcity-wallet-main">
         <header className="slotcity-wallet-topbar">
@@ -1204,6 +1223,14 @@ export function PaymentsDashboard() {
             >
               <span className="slotcity-wallet-live-ping" />
               Auto refresh: 30s
+            </button>
+            <button
+              type="button"
+              className="slotcity-wallet-refresh"
+              onClick={resetLayout}
+              title="Скинути розташування блоків"
+            >
+              ↻ Reset layout
             </button>
             <button type="button" className="slotcity-wallet-alert-badge" aria-label="Alerts">
               7
@@ -1258,8 +1285,15 @@ export function PaymentsDashboard() {
           />
         </section>
 
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
         <div className="slotcity-wallet-board">
           <div className="slotcity-wallet-column">
+            <SortableContext items={layout.column1?.map(c => c.id) || []} strategy={verticalListSortingStrategy}>
+            <DraggableCard id="live-activity">
             <article className="slotcity-wallet-card">
               <div className="slotcity-wallet-card-toolbar">
                 <ChartHeader kicker="LIVE ACTIVITY FEED" title="Event stream" meta={isLoading ? "Loading" : "LIVE"} />
@@ -1276,7 +1310,9 @@ export function PaymentsDashboard() {
                 ))}
               </div>
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="latest-transactions">
             <article className="slotcity-wallet-card">
               <ChartHeader kicker="LATEST TRANSACTIONS" title="Payments and statuses" meta={`${latestTransactions.length} rows`} />
               <div className="slotcity-wallet-table">
@@ -1298,14 +1334,20 @@ export function PaymentsDashboard() {
                 ))}
               </div>
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="conversion">
             <article className="slotcity-wallet-card">
               <ChartHeader kicker="CONVERSION" title="Registration → deposit" meta="Funnel" />
               <FunnelChart steps={funnelSteps} />
             </article>
+            </DraggableCard>
+            </SortableContext>
           </div>
 
           <div className="slotcity-wallet-column slotcity-wallet-column-wide">
+            <SortableContext items={layout.column2?.map(c => c.id) || []} strategy={verticalListSortingStrategy}>
+            <DraggableCard id="risk-monitor">
             <article className="slotcity-wallet-card slotcity-wallet-card-alert">
               <div className="slotcity-wallet-card-toolbar">
                 <ChartHeader kicker="RISK MONITOR" title="Risk signal stream" meta="Alert stream" />
@@ -1347,7 +1389,9 @@ export function PaymentsDashboard() {
                 ]}
               />
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="key-metrics">
             <article className="slotcity-wallet-card">
               <ChartHeader kicker="KEY METRICS (LIVE)" title="10 operator charts" meta="Realtime panels" />
               <div className="slotcity-wallet-mini-grid">
@@ -1374,7 +1418,8 @@ export function PaymentsDashboard() {
                     days={dayPoints}
                     series={[
                       { label: "Deposits", color: "var(--slotcity-chart-green)", values: approvedSeries, area: true },
-                      { label: "Withdrawals", color: "var(--slotcity-chart-red)", values: withdrawalSeries }
+                      { label: "Withdrawals", color: "var(--slotcity-chart-red)", values: withdrawalSeries },
+                      { label: "Manual credits", color: "var(--slotcity-chart-blue)", values: manualCreditSeries, dashed: true }
                     ]}
                     suffix=" ₴"
                   />
@@ -1425,7 +1470,9 @@ export function PaymentsDashboard() {
                 </div>
               </div>
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="payment-gateways">
             <article className="slotcity-wallet-card">
               <ChartHeader kicker="PAYMENT GATEWAYS" title="Gateway throughput" meta="Success rate" />
               <div className="slotcity-wallet-table">
@@ -1445,9 +1492,13 @@ export function PaymentsDashboard() {
                 ))}
               </div>
             </article>
+            </DraggableCard>
+            </SortableContext>
           </div>
 
           <div className="slotcity-wallet-column">
+            <SortableContext items={layout.column3?.map(c => c.id) || []} strategy={verticalListSortingStrategy}>
+            <DraggableCard id="player-control">
             <article className="slotcity-wallet-card">
               <div className="slotcity-wallet-card-toolbar">
                 <ChartHeader kicker="PLAYER CONTROL PANEL" title={featuredUser?.displayName ?? "Player not selected"} meta="Operator controls" />
@@ -1465,7 +1516,12 @@ export function PaymentsDashboard() {
                     <div>
                       <div className="slotcity-wallet-player-name">
                         <strong>{featuredUser.username}</strong>
-                        <span className="slotcity-wallet-player-chip">VIP 3</span>
+                        {featuredUser.isVip ? (
+                          <span className="slotcity-wallet-player-chip">VIP</span>
+                        ) : null}
+                        {featuredUser.status === "blocked" ? (
+                          <span className="slotcity-wallet-player-chip is-danger">BLOCKED</span>
+                        ) : null}
                       </div>
                       <span>ID: {featuredUser.userId} · Country: UA</span>
                       <small>Register: {new Intl.DateTimeFormat("uk-UA", { dateStyle: "medium" }).format(new Date(featuredUser.createdAt))}</small>
@@ -1488,10 +1544,11 @@ export function PaymentsDashboard() {
                   </div>
 
                   <div className="slotcity-wallet-player-actions">
-                    <button type="button" className="slotcity-wallet-action danger">Block Player</button>
-                    <button type="button" className="slotcity-wallet-action gold">Set Limit</button>
-                    <button type="button" className="slotcity-wallet-action blue">KYC</button>
-                    <button type="button" className="slotcity-wallet-action">Add Note</button>
+                    <a href={`/operator/players?userId=${encodeURIComponent(featuredUser.userId)}`} className="slotcity-wallet-action blue">Open Player</a>
+                    <a href={`/operator/players?userId=${encodeURIComponent(featuredUser.userId)}`} className="slotcity-wallet-action gold">Manual Credit</a>
+                    <a href={`/operator/players?userId=${encodeURIComponent(featuredUser.userId)}`} className="slotcity-wallet-action">
+                      Security
+                    </a>
                   </div>
 
                   <div className="slotcity-wallet-feed-list">
@@ -1511,7 +1568,9 @@ export function PaymentsDashboard() {
                 <p className="slotcity-wallet-empty-copy">Поки що немає гравця для фокусної панелі.</p>
               )}
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="bonuses">
             <article className="slotcity-wallet-card">
               <div className="slotcity-wallet-card-toolbar">
                 <ChartHeader kicker="7. BONUSES VS INCOME" title="Bonus overview" meta={bonusFeedReady ? "LIVE" : "Feed pending"} />
@@ -1539,7 +1598,9 @@ export function PaymentsDashboard() {
                 ))}
               </div>
             </article>
+            </DraggableCard>
 
+            <DraggableCard id="retention">
             <article className="slotcity-wallet-card">
               <div className="slotcity-wallet-card-toolbar">
                 <ChartHeader kicker="8. RETENTION + 10. RISK DASHBOARD" title="Retention and games performance" meta="Heatmap + risk state" />
@@ -1565,8 +1626,11 @@ export function PaymentsDashboard() {
                 ))}
               </div>
             </article>
+            </DraggableCard>
+            </SortableContext>
           </div>
         </div>
+        </DndContext>
 
         <div className="slotcity-wallet-bottom-row">
           <article className="slotcity-wallet-card">
