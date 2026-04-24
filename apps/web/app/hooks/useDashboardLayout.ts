@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export interface DashboardCard {
   id: string;
@@ -33,29 +34,43 @@ export function useDashboardLayout() {
   const [layout, setLayout] = useState<LayoutPreferences>(DEFAULT_LAYOUT);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const cloneLayout = useCallback((source: LayoutPreferences): LayoutPreferences => {
+    return Object.fromEntries(
+      Object.entries(source).map(([key, cards]) => [
+        key,
+        cards.map((card) => ({ ...card }))
+      ])
+    );
+  }, []);
+
+  const persistLayout = useCallback((nextLayout: LayoutPreferences) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextLayout));
+    } catch (error) {
+      console.error('Failed to save dashboard layout:', error);
+    }
+  }, []);
+
   // Load from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as LayoutPreferences;
-        setLayout(parsed);
+        setLayout(cloneLayout(parsed));
       }
     } catch (error) {
       console.error('Failed to load dashboard layout:', error);
     }
     setIsLoaded(true);
-  }, []);
+  }, [cloneLayout]);
 
   // Save to localStorage when layout changes
   const saveLayout = useCallback((newLayout: LayoutPreferences) => {
-    setLayout(newLayout);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout));
-    } catch (error) {
-      console.error('Failed to save dashboard layout:', error);
-    }
-  }, []);
+    const nextLayout = cloneLayout(newLayout);
+    setLayout(nextLayout);
+    persistLayout(nextLayout);
+  }, [cloneLayout, persistLayout]);
 
   // Reset to default layout
   const resetLayout = useCallback(() => {
@@ -65,53 +80,62 @@ export function useDashboardLayout() {
   // Move card between columns
   const moveCard = useCallback(
     (cardId: string, fromColumn: string, toColumn: string, toIndex: number) => {
-      const newLayout = { ...layout };
+      setLayout((currentLayout) => {
+        const nextLayout = cloneLayout(currentLayout);
+        const fromCards = [...(nextLayout[fromColumn] || [])];
+        const toCards = fromColumn === toColumn ? fromCards : [...(nextLayout[toColumn] || [])];
+        const cardIndex = fromCards.findIndex((card) => card.id === cardId);
 
-      // Find and remove card from source column
-      const fromCards = newLayout[fromColumn] || [];
-      const cardIndex = fromCards.findIndex((c) => c.id === cardId);
+        if (cardIndex === -1) {
+          return currentLayout;
+        }
 
-      if (cardIndex === -1) return;
+        const [card] = fromCards.splice(cardIndex, 1);
+        const nextColumnIndex = Math.max(parseInt(toColumn.replace('column', ''), 10) - 1, 0);
+        const safeIndex = Math.max(0, Math.min(toIndex, toCards.length));
+        toCards.splice(safeIndex, 0, {
+          ...card,
+          columnIndex: nextColumnIndex
+        });
 
-      const [card] = fromCards.splice(cardIndex, 1);
+        nextLayout[fromColumn] = fromCards.map((item, index) => ({
+          ...item,
+          rowIndex: index
+        }));
+        nextLayout[toColumn] = toCards.map((item, index) => ({
+          ...item,
+          rowIndex: index
+        }));
 
-      // Add card to destination column
-      const toCards = newLayout[toColumn] || [];
-      card.columnIndex = parseInt(toColumn.replace('column', '')) - 1;
-      toCards.splice(toIndex, 0, card);
-
-      // Update row indices for both columns
-      newLayout[fromColumn] = fromCards.map((c, i) => ({
-        ...c,
-        rowIndex: i
-      }));
-      newLayout[toColumn] = toCards.map((c, i) => ({
-        ...c,
-        rowIndex: i
-      }));
-
-      saveLayout(newLayout);
+        persistLayout(nextLayout);
+        return nextLayout;
+      });
     },
-    [layout, saveLayout]
+    [cloneLayout, persistLayout]
   );
 
   // Reorder cards within same column
   const reorderCards = useCallback(
     (columnKey: string, fromIndex: number, toIndex: number) => {
-      const newLayout = { ...layout };
-      const column = [...(newLayout[columnKey] || [])];
+      setLayout((currentLayout) => {
+        const nextLayout = cloneLayout(currentLayout);
+        const column = [...(nextLayout[columnKey] || [])];
 
-      const [card] = column.splice(fromIndex, 1);
-      column.splice(toIndex, 0, card);
+        if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+          return currentLayout;
+        }
 
-      newLayout[columnKey] = column.map((c, i) => ({
-        ...c,
-        rowIndex: i
-      }));
+        const reordered = arrayMove(column, fromIndex, toIndex).map((card, index) => ({
+          ...card,
+          rowIndex: index
+        }));
 
-      saveLayout(newLayout);
+        nextLayout[columnKey] = reordered;
+        persistLayout(nextLayout);
+        return nextLayout;
+      });
     },
-    [layout, saveLayout]
+    [cloneLayout, persistLayout]
   );
 
   return {

@@ -29,8 +29,10 @@ import {
   listDepositRequests,
   listLedgerEntries,
   listStorefrontUsers,
+  manualCreditStorefrontUser,
   rejectDepositRequest,
   touchUserSeen,
+  updateStorefrontUserAdminState,
   upsertFinanceAdminUser,
   upsertGoogleUser,
   verifyCredentialUser,
@@ -105,6 +107,19 @@ const googleUpsertSchema = z.object({
 
 const depositSchema = z.object({
   amount: z.number().positive().max(1_000_000)
+});
+
+const manualCreditSchema = z.object({
+  amount: z.number().positive().max(1_000_000),
+  note: z.string().max(500).optional().nullable(),
+  createdBy: z.string().min(1).max(128).optional().nullable()
+});
+
+const userAdminStateSchema = z.object({
+  status: z.enum(["active", "blocked"]).optional(),
+  isVip: z.boolean().optional(),
+  password: z.string().min(8).max(128).optional().nullable(),
+  updatedBy: z.string().min(1).max(128).optional().nullable()
 });
 
 const depositRequestSchema = z.object({
@@ -576,6 +591,91 @@ app.post("/auth/users/:userId/deposit", async (request, reply) => {
     ok: true,
     user
   });
+});
+
+app.post("/auth/users/:userId/manual-credit", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    userId: string;
+  };
+  const parsed = manualCreditSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректна сума або примітка ручного нарахування."
+    });
+  }
+
+  const user = await manualCreditStorefrontUser({
+    userId: params.userId,
+    amount: Math.round(parsed.data.amount),
+    note: parsed.data.note ?? null,
+    createdBy: parsed.data.createdBy ?? null
+  });
+
+  if (!user) {
+    return reply.code(404).send({
+      error: "user_not_found"
+    });
+  }
+
+  return reply.send({
+    ok: true,
+    user
+  });
+});
+
+app.post("/auth/users/:userId/admin-state", async (request, reply) => {
+  if (!hasAuthServiceAccess(request.headers)) {
+    return reply.code(401).send({
+      error: "unauthorized"
+    });
+  }
+
+  const params = request.params as {
+    userId: string;
+  };
+  const parsed = userAdminStateSchema.safeParse(request.body ?? {});
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "invalid_payload",
+      message: "Некоректні admin-поля користувача."
+    });
+  }
+
+  try {
+    const user = await updateStorefrontUserAdminState({
+      userId: params.userId,
+      status: parsed.data.status,
+      isVip: parsed.data.isVip,
+      password: parsed.data.password ?? undefined,
+      updatedBy: parsed.data.updatedBy ?? null
+    });
+
+    if (!user) {
+      return reply.code(404).send({
+        error: "user_not_found"
+      });
+    }
+
+    return reply.send({
+      ok: true,
+      user
+    });
+  } catch (error) {
+    return reply.code(400).send({
+      error: "user_admin_state_failed",
+      message:
+        error instanceof Error ? error.message : "Не вдалося оновити стан користувача."
+    });
+  }
 });
 
 app.get("/auth/users/:userId/finance", async (request, reply) => {

@@ -12,7 +12,8 @@ export interface StorefrontUser {
   displayName: string;
   authProvider: string;
   balance: number;
-  status: "active";
+  status: "active" | "blocked";
+  isVip: boolean;
   avatarUrl?: string | null;
   googleSubject?: string | null;
   emailVerifiedAt?: string | null;
@@ -31,7 +32,8 @@ interface StorefrontUserRow {
   password_hash: string | null;
   google_subject: string | null;
   balance: number;
-  status: "active";
+  status: "active" | "blocked";
+  is_vip: boolean;
   avatar_url: string | null;
   email_verified_at: Date | null;
   created_at: Date;
@@ -146,6 +148,21 @@ export interface StorefrontUserFinanceProfile {
   recentLedger: StorefrontLedgerEntry[];
 }
 
+export interface StorefrontUserAdminUpdateInput {
+  userId: string;
+  status?: "active" | "blocked";
+  isVip?: boolean;
+  password?: string | null;
+  updatedBy?: string | null;
+}
+
+export interface StorefrontUserManualCreditInput {
+  userId: string;
+  amount: number;
+  note?: string | null;
+  createdBy?: string | null;
+}
+
 interface FinanceAdminUserRow {
   admin_id: string;
   email: string;
@@ -227,6 +244,7 @@ function mapUser(row: StorefrontUserRow): StorefrontUser {
     authProvider: row.auth_provider,
     balance: Number(row.balance) || 0,
     status: row.status,
+    isVip: Boolean(row.is_vip),
     avatarUrl: row.avatar_url,
     googleSubject: row.google_subject,
     emailVerifiedAt: toIsoString(row.email_verified_at),
@@ -356,6 +374,7 @@ async function ensureSchema() {
           google_subject TEXT UNIQUE,
           balance INTEGER NOT NULL DEFAULT 0,
           status TEXT NOT NULL DEFAULT 'active',
+          is_vip BOOLEAN NOT NULL DEFAULT FALSE,
           avatar_url TEXT,
           email_verified_at TIMESTAMPTZ,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -363,6 +382,11 @@ async function ensureSchema() {
           last_login_at TIMESTAMPTZ,
           last_seen_at TIMESTAMPTZ
         );
+      `);
+
+      await pool.query(`
+        ALTER TABLE storefront_auth_users
+        ADD COLUMN IF NOT EXISTS is_vip BOOLEAN NOT NULL DEFAULT FALSE;
       `);
 
       await pool.query(`
@@ -823,6 +847,7 @@ export async function createCredentialUser(input: {
 }
 
 export async function verifyCredentialUser(input: { email: string; password: string }) {
+  await ensureSchema();
   const row = await queryRowBySql<StorefrontUserRow>(
     `
       SELECT *
@@ -834,6 +859,10 @@ export async function verifyCredentialUser(input: { email: string; password: str
   );
 
   if (!row?.password_hash) {
+    return null;
+  }
+
+  if (row.status !== "active") {
     return null;
   }
 
@@ -886,6 +915,10 @@ export async function upsertGoogleUser(input: {
   );
 
   if (byGoogle) {
+    if (byGoogle.status !== "active") {
+      throw new Error("Користувача заблоковано адміністратором.");
+    }
+
     const updated = await pool.query<StorefrontUserRow>(
       `
         UPDATE storefront_auth_users
@@ -922,6 +955,10 @@ export async function upsertGoogleUser(input: {
   );
 
   if (byEmail) {
+    if (byEmail.status !== "active") {
+      throw new Error("Користувача заблоковано адміністратором.");
+    }
+
     const updated = await pool.query<StorefrontUserRow>(
       `
         UPDATE storefront_auth_users
@@ -983,6 +1020,15 @@ export async function upsertGoogleUser(input: {
 }
 
 export async function incrementUserBalance(input: { userId: string; amount: number }) {
+  return manualCreditStorefrontUser({
+    userId: input.userId,
+    amount: input.amount,
+    createdBy: "legacy-operator",
+    note: "Legacy balance adjustment"
+  });
+}
+
+export async function manualCreditStorefrontUser(input: StorefrontUserManualCreditInput) {
   await ensureSchema();
   const pool = getPool();
   const client = await pool.connect();
@@ -993,9 +1039,13 @@ export async function incrementUserBalance(input: { userId: string; amount: numb
       userId: input.userId,
       amount: Math.round(input.amount),
       direction: "credit",
-      entryType: "operator_credit",
-      source: "operator",
-      description: "Legacy balance adjustment"
+      entryType: "manual_credit",
+      source: "finance_admin",
+      description: normalizeOptionalText(input.note) ?? "Manual balance credit by operator",
+      meta: {
+        note: normalizeOptionalText(input.note) ?? null
+      },
+      createdBy: input.createdBy ?? null
     });
     await client.query("COMMIT");
     await syncMirror(user);
@@ -1010,6 +1060,61 @@ export async function incrementUserBalance(input: { userId: string; amount: numb
   } finally {
     client.release();
   }
+}
+
+export async function updateStorefrontUserAdminState(input: StorefrontUserAdminUpdateInput) {
+  await ensureSchema();
+  const pool = getPool();
+  const current = await queryRowBySql<StorefrontUserRow>(
+    `
+      SELECT *
+      FROM storefront_auth_users
+      WHERE user_id = $1
+      LIMIT 1
+    `,
+    [input.userId]
+  );
+
+  if (!current) {
+    return null;
+  }
+
+  const nextPassword = normalizeOptionalText(input.password);
+
+  if (input.password !== undefined && (!nextPassword || nextPassword.length < 8)) {
+    throw new Error("Пароль повинен містити мінімум 8 символів.");
+  }
+
+  const passwordHash = nextPassword ? await bcrypt.hash(nextPassword, SALT_ROUNDS) : null;
+  const nextStatus = input.status ?? current.status;
+  const nextIsVip = input.isVip ?? current.is_vip;
+  const shouldUpgradeAuthProvider =
+    Boolean(passwordHash) && current.auth_provider === "google";
+
+  const result = await pool.query<StorefrontUserRow>(
+    `
+      UPDATE storefront_auth_users
+      SET status = $2,
+          is_vip = $3,
+          password_hash = COALESCE($4, password_hash),
+          auth_provider = CASE
+            WHEN $5::boolean THEN 'credentials+google'
+            ELSE auth_provider
+          END,
+          updated_at = NOW()
+      WHERE user_id = $1
+      RETURNING *
+    `,
+    [input.userId, nextStatus, nextIsVip, passwordHash, shouldUpgradeAuthProvider]
+  );
+
+  if (!result.rows[0]) {
+    return null;
+  }
+
+  const user = mapUser(result.rows[0]);
+  await syncMirror(user);
+  return user;
 }
 
 export async function createDepositRequest(input: {
