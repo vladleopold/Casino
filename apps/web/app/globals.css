@@ -8222,7 +8222,7 @@ a {
 
 .slotcity-wallet-board {
   display: grid;
-  grid-template-columns: 1.08fr 1.18fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
   align-items: start;
   grid-auto-flow: dense;
@@ -8230,9 +8230,10 @@ a {
 }
 
 .slotcity-wallet-board-with-rail {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 380px);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
   align-items: start;
+  grid-auto-flow: dense;
   min-width: 0;
 }
 
@@ -8240,6 +8241,7 @@ a {
   display: grid;
   gap: 20px;
   min-width: 0;
+  align-self: start;
 }
 
 .slotcity-wallet-right-rail {
@@ -8253,6 +8255,11 @@ a {
 
 .slotcity-wallet-column-wide {
   grid-template-rows: auto auto auto;
+}
+
+.slotcity-wallet-board > .slotcity-wallet-column-wide,
+.slotcity-wallet-board-with-rail > .slotcity-wallet-column-wide {
+  grid-column: span 2;
 }
 
 .slotcity-wallet-panel-grid {
@@ -9345,11 +9352,17 @@ a {
   .slotcity-wallet-bottom-row {
     grid-template-columns: 1fr;
   }
+
+  .slotcity-wallet-board > .slotcity-wallet-column-wide,
+  .slotcity-wallet-board-with-rail > .slotcity-wallet-column-wide {
+    grid-column: span 1;
+  }
 }
 
 @media (max-width: 1760px) {
-  .slotcity-wallet-board-with-rail {
-    grid-template-columns: 1fr;
+  .slotcity-wallet-board > .slotcity-wallet-column-wide,
+  .slotcity-wallet-board-with-rail > .slotcity-wallet-column-wide {
+    grid-column: span 1;
   }
 
   .slotcity-wallet-right-rail {
